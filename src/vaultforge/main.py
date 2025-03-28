@@ -7,9 +7,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from vaultforge import __version__
+from vaultforge.api.errors import register_exception_handlers
+from vaultforge.api.health import router as health_router
+from vaultforge.api.monitoring import router as monitoring_router
+from vaultforge.api.v1.router import api_v1_router
+from vaultforge.api.ws.notifications import router as ws_router
 from vaultforge.core.config import get_settings
 from vaultforge.core.logging import configure_logging, get_logger
-from vaultforge.api.health import router as health_router
 
 
 def create_app() -> FastAPI:
@@ -25,6 +29,8 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json",
     )
 
+    register_exception_handlers(app)
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -34,6 +40,9 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(health_router)
+    app.include_router(monitoring_router)
+    app.include_router(api_v1_router, prefix=settings.app_api_prefix)
+    app.include_router(ws_router)
 
     @app.on_event("startup")
     async def on_startup() -> None:
