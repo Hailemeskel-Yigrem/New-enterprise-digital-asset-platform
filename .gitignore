@@ -36,11 +36,11 @@ ENV/
 *.key
 
 # Runtime / storage
-storage/
-uploads/
-tmp/
+/storage/
+/uploads/
+/tmp/
 *.log
-logs/
+/logs/
 
 # Node / frontend
 node_modules/
