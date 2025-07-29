@@ -7,11 +7,14 @@ import uuid
 
 from vaultforge.application.assets.schemas import (
     CheckoutResponse,
+    DocumentDownloadResult,
     DocumentResponse,
+    DocumentUpdateRequest,
     DocumentUploadRequest,
     DocumentVersionCreateRequest,
     DocumentVersionResponse,
 )
+from vaultforge.core.pagination import Page, PageParams
 from vaultforge.core.exceptions import ConflictError, NotFoundError, ValidationError
 from vaultforge.domain.assets.entities import Document, DocumentVersion
 from vaultforge.domain.assets.enums import VersionStatus
@@ -207,6 +210,87 @@ class DocumentService:
         if document.current_version_id is not None:
             current_version = await self._versions.get_by_id(document.current_version_id)
         return await self._to_response(document, current_version)
+
+    async def update_document(
+        self,
+        organization_id: uuid.UUID,
+        document_id: uuid.UUID,
+        payload: DocumentUpdateRequest,
+    ) -> DocumentResponse:
+        document = await self._require_document(organization_id, document_id)
+        active_lock = await self._locks.get_active_for_document(document.id)
+        if active_lock is not None:
+            raise ConflictError("Cannot update metadata while document is checked out")
+        if payload.name is not None:
+            document.rename(payload.name)
+        if payload.sensitivity is not None:
+            document.sensitivity = payload.sensitivity
+            document.touch()
+        if payload.tags is not None:
+            document.set_tags(payload.tags)
+        saved_document = await self._documents.update(document)
+        current_version = None
+        if saved_document.current_version_id is not None:
+            current_version = await self._versions.get_by_id(saved_document.current_version_id)
+        return await self._to_response(saved_document, current_version)
+
+    async def archive_document(
+        self,
+        organization_id: uuid.UUID,
+        document_id: uuid.UUID,
+    ) -> DocumentResponse:
+        document = await self._require_document(organization_id, document_id)
+        active_lock = await self._locks.get_active_for_document(document.id)
+        if active_lock is not None:
+            raise ConflictError("Cannot archive a checked-out document")
+        document.archive()
+        saved_document = await self._documents.update(document)
+        current_version = None
+        if saved_document.current_version_id is not None:
+            current_version = await self._versions.get_by_id(saved_document.current_version_id)
+        return await self._to_response(saved_document, current_version)
+
+    async def list_versions(
+        self,
+        organization_id: uuid.UUID,
+        document_id: uuid.UUID,
+        *,
+        params: PageParams | None = None,
+    ) -> Page[DocumentVersionResponse]:
+        document = await self._require_document(organization_id, document_id)
+        page_params = params or PageParams()
+        versions = list(await self._versions.list_for_document(document.id))
+        total = len(versions)
+        start = page_params.offset
+        end = start + page_params.limit
+        slice_ = versions[start:end]
+        items = [DocumentVersionResponse.model_validate(v) for v in slice_]
+        return Page.build(items, total=total, params=page_params)
+
+    async def download_content(
+        self,
+        organization_id: uuid.UUID,
+        document_id: uuid.UUID,
+        *,
+        version_id: uuid.UUID | None = None,
+    ) -> DocumentDownloadResult:
+        document = await self._require_document(organization_id, document_id)
+        target_version_id = version_id or document.current_version_id
+        if target_version_id is None:
+            raise NotFoundError("Document has no downloadable version")
+        version = await self._versions.get_by_id(target_version_id)
+        if version is None or version.document_id != document.id:
+            raise NotFoundError("Document version not found")
+        data = await self._storage.get(version.storage_key)
+        return DocumentDownloadResult(
+            document_id=document.id,
+            version_id=version.id,
+            filename=document.name,
+            content_type=version.content_type,
+            size_bytes=version.size_bytes,
+            checksum_sha256=version.checksum_sha256,
+            data=data,
+        )
 
     async def _require_document(self, organization_id: uuid.UUID, document_id: uuid.UUID) -> Document:
         document = await self._documents.get_by_id(organization_id, document_id)
