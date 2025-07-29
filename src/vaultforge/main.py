@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from vaultforge import __version__
 from vaultforge.api.errors import register_exception_handlers
+from vaultforge.api.middleware.rate_limit import RateLimitMiddleware
+from vaultforge.api.middleware import RequestIdMiddleware, TimingMiddleware
 from vaultforge.api.health import router as health_router
 from vaultforge.api.monitoring import router as monitoring_router
 from vaultforge.api.v1.router import api_v1_router
@@ -31,6 +33,8 @@ def create_app() -> FastAPI:
 
     register_exception_handlers(app)
 
+    app.add_middleware(TimingMiddleware)
+    app.add_middleware(RequestIdMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -38,6 +42,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(RateLimitMiddleware)
 
     app.include_router(health_router)
     app.include_router(monitoring_router)

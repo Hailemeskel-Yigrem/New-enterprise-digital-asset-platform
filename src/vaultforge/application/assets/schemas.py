@@ -113,3 +113,17 @@ class CheckoutResponse(BaseModel):
     locked_by: uuid.UUID
     locked_at: datetime
     expires_at: datetime | None
+
+
+class DocumentDownloadResult(BaseModel):
+    """Binary payload returned by the document download service."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    document_id: uuid.UUID
+    version_id: uuid.UUID
+    filename: str
+    content_type: str
+    size_bytes: int
+    checksum_sha256: str
+    data: bytes
