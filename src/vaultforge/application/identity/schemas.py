@@ -31,6 +31,36 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class OAuthTokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str | None = None
+    token_type: str = "bearer"
+    expires_in: int = 1800
+    scope: str | None = None
+
+
+class OAuthTokenRequest(BaseModel):
+    grant_type: str
+    client_id: str
+    client_secret: str | None = None
+    username: str | None = None
+    password: str | None = None
+    refresh_token: str | None = None
+    code: str | None = None
+    redirect_uri: str | None = None
+    code_verifier: str | None = None
+    scope: str | None = None
+
+
+class OIDCDiscoveryResponse(BaseModel):
+    issuer: str
+    authorization_endpoint: str
+    token_endpoint: str
+    jwks_uri: str
+    scopes_supported: list[str] = Field(default_factory=list)
+    grant_types_supported: list[str] = Field(default_factory=list)
+
+
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
