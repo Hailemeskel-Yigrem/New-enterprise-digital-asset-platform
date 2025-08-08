@@ -43,9 +43,38 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
 
+    oauth_issuer_base: str = "http://localhost:8000"
+    oauth_default_client_id: str = "vaultforge-web"
+    oauth_default_client_secret: str = "vaultforge-web-secret"
+    oauth_redirect_uris: list[str] = Field(
+        default_factory=lambda: ["http://localhost:3000/oauth/callback"]
+    )
+    oauth_google_client_id: str = ""
+    oauth_google_client_secret: str | None = None
+    oauth_google_redirect_uris: list[str] = Field(
+        default_factory=lambda: ["http://localhost:3000/oauth/google/callback"]
+    )
+
+    rate_limit_enabled: bool = True
+    rate_limit_global_requests: int = 300
+    rate_limit_global_window: int = 60
+    rate_limit_auth_requests: int = 20
+    rate_limit_auth_window: int = 60
+    rate_limit_oauth_requests: int = 30
+    rate_limit_oauth_window: int = 60
+    rate_limit_export_requests: int = 5
+    rate_limit_export_window: int = 300
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def split_cors_origins(cls, value: object) -> object:
+        if isinstance(value, str):
+            return [item.strip() for item in value.split(",") if item.strip()]
+        return value
+
+    @field_validator("oauth_redirect_uris", "oauth_google_redirect_uris", mode="before")
+    @classmethod
+    def split_oauth_uris(cls, value: object) -> object:
         if isinstance(value, str):
             return [item.strip() for item in value.split(",") if item.strip()]
         return value
