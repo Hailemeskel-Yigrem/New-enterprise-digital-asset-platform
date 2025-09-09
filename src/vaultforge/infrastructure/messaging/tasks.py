@@ -136,3 +136,51 @@ def nightly_stats(organization_id: str | None = None) -> dict[str, Any]:
         return stats
 
     return _run_async(_with_session(_stats))
+
+
+@celery_app.task(name="vaultforge.infrastructure.messaging.tasks.queue_export_job")
+def queue_export_job(job_id: str) -> dict[str, str]:
+    """Run a long-running export job asynchronously."""
+
+    async def _export(session: AsyncSession) -> dict[str, str]:
+        from vaultforge.application.jobs.export_service import ExportService
+        from vaultforge.infrastructure.persistence.repositories.job_repository import (
+            SqlAlchemyExportJobRepository,
+            StubDocumentExportSource,
+        )
+
+        service = ExportService(SqlAlchemyExportJobRepository(session), StubDocumentExportSource())
+        result = await service.run_export(uuid.UUID(job_id))
+        log.info("export_job_task_completed", job_id=job_id, status=result.status.value)
+        return {"status": result.status.value, "job_id": job_id, "artifact": result.artifact_path or ""}
+
+    return _run_async(_with_session(_export))
+
+
+@celery_app.task(name="vaultforge.infrastructure.messaging.tasks.queue_import_job")
+def queue_import_job(job_id: str) -> dict[str, str]:
+    """Run a long-running import job asynchronously."""
+
+    async def _import(session: AsyncSession) -> dict[str, str]:
+        from vaultforge.application.jobs.import_service import ImportService
+        from vaultforge.infrastructure.persistence.repositories.job_repository import (
+            SqlAlchemyImportJobRepository,
+            StubDocumentImportSink,
+        )
+
+        service = ImportService(SqlAlchemyImportJobRepository(session), StubDocumentImportSink())
+        result = await service.run_import(uuid.UUID(job_id))
+        log.info(
+            "import_job_task_completed",
+            job_id=job_id,
+            status=result.status.value,
+            processed=result.items_processed,
+        )
+        return {
+            "status": result.status.value,
+            "job_id": job_id,
+            "processed": str(result.items_processed),
+            "failed": str(result.items_failed),
+        }
+
+    return _run_async(_with_session(_import))
