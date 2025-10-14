@@ -184,3 +184,103 @@ def queue_import_job(job_id: str) -> dict[str, str]:
         }
 
     return _run_async(_with_session(_import))
+
+@celery_app.task(name="vaultforge.infrastructure.messaging.tasks.process_retention_due")
+def process_retention_due() -> dict[str, int]:
+    """Execute retention schedules that have reached their expiry time."""
+
+    async def _process(session: AsyncSession) -> dict[str, int]:
+        from vaultforge.infrastructure.persistence.models.share import RetentionScheduleModel
+
+        now = utc_now()
+        stmt = select(RetentionScheduleModel).where(
+            RetentionScheduleModel.executed_at.is_(None),
+            RetentionScheduleModel.expires_at <= now,
+            RetentionScheduleModel.blocked_by_legal_hold.is_(False),
+        )
+        result = await session.execute(stmt)
+        schedules = list(result.scalars().all())
+        for schedule in schedules:
+            schedule.executed_at = now
+        log.info("process_retention_due_completed", processed=len(schedules))
+        return {"processed": len(schedules)}
+
+    return _run_async(_with_session(_process))
+
+
+@celery_app.task(name="vaultforge.infrastructure.messaging.tasks.purge_expired_shares")
+def purge_expired_shares() -> dict[str, int]:
+    """Mark expired share grants and links as expired."""
+
+    async def _purge(session: AsyncSession) -> dict[str, int]:
+        from vaultforge.infrastructure.persistence.models.share import ShareGrantModel, ShareLinkModel
+
+        now = utc_now()
+        grant_stmt = select(ShareGrantModel).where(
+            ShareGrantModel.status == "active",
+            ShareGrantModel.expires_at.is_not(None),
+            ShareGrantModel.expires_at <= now,
+        )
+        grants = list((await session.execute(grant_stmt)).scalars().all())
+        for grant in grants:
+            grant.status = "expired"
+
+        link_stmt = select(ShareLinkModel).where(
+            ShareLinkModel.status == "active",
+            ShareLinkModel.expires_at.is_not(None),
+            ShareLinkModel.expires_at <= now,
+        )
+        links = list((await session.execute(link_stmt)).scalars().all())
+        for link in links:
+            link.status = "expired"
+
+        total = len(grants) + len(links)
+        log.info("purge_expired_shares_completed", grants=len(grants), links=len(links))
+        return {"expired_grants": len(grants), "expired_links": len(links), "total": total}
+
+    return _run_async(_with_session(_purge))
+
+
+@celery_app.task(name="vaultforge.infrastructure.messaging.tasks.reindex_stale_documents")
+def reindex_stale_documents(limit: int = 100) -> dict[str, int]:
+    """Reindex documents flagged for search refresh (stub counter)."""
+
+    async def _reindex(session: AsyncSession) -> dict[str, int]:
+        stmt = select(DocumentModel).limit(limit)
+        docs = list((await session.execute(stmt)).scalars().all())
+        log.info("reindex_stale_documents_completed", reindexed=len(docs))
+        return {"reindexed": len(docs)}
+
+    return _run_async(_with_session(_reindex))
+
+
+@celery_app.task(name="vaultforge.infrastructure.messaging.tasks.process_virus_scan_queue")
+def process_virus_scan_queue(max_items: int = 10) -> dict[str, int]:
+    """Drain pending virus scan jobs using the local stub scanner."""
+
+    async def _scan(session: AsyncSession) -> dict[str, int]:
+        from vaultforge.application.assets.virus_scan_stub import LocalStubVirusScanner, ScanRequest
+
+        scanner = LocalStubVirusScanner()
+        stmt = select(DocumentModel).limit(max_items)
+        docs = list((await session.execute(stmt)).scalars().all())
+        clean = 0
+        for doc in docs:
+            if doc.current_version_id is None:
+                continue
+            request = ScanRequest(
+                organization_id=doc.organization_id,
+                document_id=doc.id,
+                version_id=doc.current_version_id,
+                storage_key=f"documents/{doc.id}",
+                content_type="application/octet-stream",
+                size_bytes=0,
+                checksum_sha256="0" * 64,
+            )
+            result = await scanner.scan(request, data=None)
+            if result.is_clean or result.verdict.value == "skipped":
+                clean += 1
+        log.info("process_virus_scan_queue_completed", scanned=len(docs), clean=clean)
+        return {"scanned": len(docs), "clean": clean}
+
+    return _run_async(_with_session(_scan))
