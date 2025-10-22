@@ -274,3 +274,218 @@ export interface UsageReportResponse {
 export interface ApiError {
   detail: string | { msg: string; type: string }[];
 }
+
+export type SharePermission = "view" | "comment" | "edit" | "download" | "share" | "delete" | "admin";
+export type ShareResourceType = "document" | "folder" | "workflow" | "signature_request";
+export type ShareStatus = "active" | "revoked" | "expired" | "pending";
+
+export interface ShareGrant {
+  id: string;
+  organization_id: string;
+  resource_type: ShareResourceType;
+  resource_id: string;
+  target_type: string;
+  target_id: string | null;
+  target_email: string | null;
+  permission: SharePermission;
+  granted_by: string;
+  status: ShareStatus;
+  expires_at: string | null;
+  revoked_at: string | null;
+  message: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShareLink {
+  id: string;
+  organization_id: string;
+  resource_type: ShareResourceType;
+  resource_id: string;
+  token: string;
+  permission: SharePermission;
+  created_by: string;
+  status: ShareStatus;
+  max_uses: number | null;
+  use_count: number;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShareInvitation {
+  id: string;
+  organization_id: string;
+  resource_type: ShareResourceType;
+  resource_id: string;
+  email: string;
+  permission: SharePermission;
+  invited_by: string;
+  status: ShareStatus;
+  token: string;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AccessControlEntry {
+  id: string;
+  organization_id: string;
+  resource_type: ShareResourceType;
+  resource_id: string;
+  principal_type: string;
+  principal_id: string;
+  permission: SharePermission;
+  effect: "allow" | "deny";
+  inherited: boolean;
+  source_folder_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShareAccessCheck {
+  allowed: boolean;
+  permission: SharePermission;
+  source: string;
+}
+
+export interface RetentionPolicy {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string;
+  scope: string;
+  scope_ref_id: string | null;
+  trigger: string;
+  retention_days: number;
+  action: string;
+  status: string;
+  created_by: string;
+  priority: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RetentionSchedule {
+  id: string;
+  organization_id: string;
+  policy_id: string;
+  resource_type: string;
+  resource_id: string;
+  reference_time: string;
+  expires_at: string;
+  action: string;
+  executed_at: string | null;
+  blocked_by_legal_hold: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LegalHold {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string;
+  matter_id: string;
+  status: string;
+  created_by: string;
+  released_by: string | null;
+  released_at: string | null;
+  resource_ids: string[];
+  folder_ids: string[];
+  custodian_ids: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Notification {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  title: string;
+  body: string;
+  notification_type: string;
+  resource_type: string | null;
+  resource_id: string | null;
+  read_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NotificationListResponse {
+  items: Notification[];
+  total: number;
+  unread_count: number;
+}
+
+export interface Comment {
+  id: string;
+  organization_id: string;
+  resource_type: string;
+  resource_id: string;
+  author_id: string;
+  body: string;
+  parent_id: string | null;
+  edited_at: string | null;
+  deleted_at: string | null;
+  mentions: Array<{ id: string; comment_id: string; user_id: string }>;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SearchFacet = "document" | "folder" | "user" | "workflow";
+
+export interface SearchFilters {
+  resource_types?: string[];
+  sensitivity?: SensitivityLabel[];
+  folder_id?: string;
+  tags?: string[];
+  date_from?: string;
+  date_to?: string;
+}
+
+export interface GlobalSearchHit {
+  id: string;
+  resource_type: string;
+  title: string;
+  snippet: string;
+  score: number;
+  metadata: Record<string, unknown>;
+  updated_at: string;
+}
+
+export interface GlobalSearchResponse {
+  query: string;
+  hits: GlobalSearchHit[];
+  total: number;
+  limit: number;
+  offset: number;
+  took_ms: number;
+}
+
+export interface AdminMemberSummary {
+  id: string;
+  user_id: string;
+  email: string;
+  full_name: string;
+  role: OrgRole;
+  status: MembershipStatus;
+  last_login_at: string | null;
+}
+
+export interface AdminOrgOverview {
+  id: string;
+  name: string;
+  slug: string;
+  plan_code: string;
+  max_storage_gb: number;
+  member_count: number;
+  document_count: number;
+}
+
+export interface AdminStorageBreakdown {
+  total_bytes: number;
+  limit_bytes: number;
+  by_sensitivity: Record<string, number>;
+  by_folder: Array<{ folder_id: string; name: string; bytes: number }>;
+}
