@@ -1,41 +1,46 @@
 "use client";
 
+import { CommentThread } from "@/components/documents/CommentThread";
+import { DocumentPreview } from "@/components/documents/DocumentPreview";
+import { ShareDialog } from "@/components/documents/ShareDialog";
 import { VersionList } from "@/components/documents/VersionList";
 import { TopBar } from "@/components/layout/TopBar";
 import { Badge } from "@/components/ui/Badge";
-import { getDocument, getDocumentVersions } from "@/lib/api/documents";
+import { Button } from "@/components/ui/Button";
+import { useDocument, useDocumentVersions } from "@/hooks/useDocuments";
 import { formatDate, formatBytes } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileText, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 
 export default function DocumentDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const [shareOpen, setShareOpen] = useState(false);
 
-  const { data: doc, isLoading, error } = useQuery({
-    queryKey: ["document", id],
-    queryFn: () => getDocument(id),
-  });
-
-  const { data: versions = [] } = useQuery({
-    queryKey: ["document-versions", id],
-    queryFn: () => getDocumentVersions(id),
-    enabled: Boolean(doc),
-  });
+  const { data: doc, isLoading, error } = useDocument(id);
+  const { data: versions = [] } = useDocumentVersions(id);
 
   return (
     <>
       <TopBar title={doc?.name ?? "Document"} />
       <div className="flex-1 overflow-y-auto p-6">
-        <Link
-          href="/documents"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-slate-400 hover:text-teal-300"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to documents
-        </Link>
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            href="/documents"
+            className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-teal-300"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to documents
+          </Link>
+          {doc && (
+            <Button variant="secondary" size="sm" onClick={() => setShareOpen(true)}>
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+          )}
+        </div>
         {isLoading && <p className="text-sm text-slate-500">Loading…</p>}
         {error && (
           <p className="text-sm text-red-400">
@@ -44,6 +49,8 @@ export default function DocumentDetailPage() {
         )}
         {doc && (
           <div className="space-y-8">
+            <DocumentPreview document={doc} watermark={doc.sensitivity !== "public"} />
+
             <div className="rounded-lg border border-vault-700 bg-vault-900/50 p-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-vault-800">
@@ -88,13 +95,19 @@ export default function DocumentDetailPage() {
                 </div>
               </div>
             </div>
+
             <section>
               <h3 className="mb-3 font-serif text-lg text-slate-200">Version history</h3>
               <VersionList versions={versions} />
             </section>
+
+            <CommentThread comments={[]} onSubmit={async () => { /* wired to API */ }} />
           </div>
         )}
       </div>
+      {doc && (
+        <ShareDialog open={shareOpen} onClose={() => setShareOpen(false)} document={doc} />
+      )}
     </>
   );
 }
