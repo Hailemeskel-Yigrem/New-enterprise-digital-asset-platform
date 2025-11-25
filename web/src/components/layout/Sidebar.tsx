@@ -1,13 +1,18 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { getUnreadCount } from "@/lib/api/notifications";
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
+  Bell,
   FileText,
   FolderTree,
   GitBranch,
   LayoutDashboard,
   PenLine,
+  Search,
   Settings,
   Shield,
   Users,
@@ -20,9 +25,11 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/documents", label: "Documents", icon: FileText },
   { href: "/folders", label: "Folders", icon: FolderTree },
+  { href: "/search", label: "Search", icon: Search },
   { href: "/workflows", label: "Workflows", icon: GitBranch },
   { href: "/signatures", label: "Signatures", icon: PenLine },
   { href: "/activity", label: "Activity", icon: Activity },
+  { href: "/notifications", label: "Notifications", icon: Bell, badge: true },
   { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/teams", label: "Teams", icon: Users },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -31,6 +38,13 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ["notifications-unread-count"],
+    queryFn: getUnreadCount,
+    enabled: isAuthenticated,
+    refetchInterval: 60_000,
+  });
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-vault-800 bg-vault-950">
@@ -46,8 +60,9 @@ export function Sidebar() {
         </div>
       </div>
       <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, label, icon: Icon, badge }) => {
           const active = pathname === href || pathname.startsWith(`${href}/`);
+          const showBadge = badge && unreadCount > 0;
           return (
             <Link
               key={href}
@@ -60,13 +75,18 @@ export function Sidebar() {
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {showBadge && (
+                <span className="rounded-full bg-teal-700 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}
       </nav>
       <div className="border-t border-vault-800 p-4">
-        <p className="text-xs text-slate-500">Enterprise document vault</p>
+        <p className="text-xs text-slate-500">Enterprise document vault · v0.9.0</p>
       </div>
     </aside>
   );
