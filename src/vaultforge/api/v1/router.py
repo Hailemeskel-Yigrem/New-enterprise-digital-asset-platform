@@ -25,6 +25,7 @@ from vaultforge.api.v1 import (
     shares,
     signatures,
     teams,
+    users,
     workflows,
 )
 
@@ -32,6 +33,7 @@ api_v1_router = APIRouter()
 api_v1_router.include_router(auth.router)
 api_v1_router.include_router(oauth.router)
 api_v1_router.include_router(organizations.router)
+api_v1_router.include_router(users.router)
 api_v1_router.include_router(teams.router)
 api_v1_router.include_router(folders.router)
 api_v1_router.include_router(documents.router)
