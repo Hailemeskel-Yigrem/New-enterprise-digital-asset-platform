@@ -2,6 +2,38 @@
 
 All notable changes to VaultForge are documented here. Versioning follows Semantic Versioning.
 
+## [1.0.0-rc1] - 2026-07-23
+
+### Added
+- Release candidate packaging: MIT LICENSE and SECURITY policy
+- Production Docker Compose overrides with Prometheus sidecar
+- Pinned `requirements.txt` fallback alongside Poetry
+- OpenAPI schema dump script and placeholder `openapi/openapi.json`
+- Request context vars (`core/context.py`) with `bind_context` helper and telemetry helpers (`core/telemetry.py`)
+- Organization-scoped user profile API (`/organizations/{org_id}/users`)
+- Expanded pytest fixtures and unit tests (telemetry, context, pagination)
+- Operations runbooks (worker failures, disk full, migration rollback)
+- Detailed architecture and security documentation
+
+### Changed
+- `.env.example` extended with OAuth and rate-limit configuration
+- `.dockerignore` tuned for lean production images
+
+## [0.9.0] - 2026-07-15
+
+### Added
+- OAuth/OIDC endpoints and Google social login configuration
+- Redis-backed rate limiting middleware with per-route rules
+- Share links, retention policies, and legal holds
+- Background import/export jobs via Celery
+- Full-text search indexer and query builder
+- Prometheus `/metrics` endpoint and dependency health probes
+- Production compose overrides and Prometheus scrape config
+
+### Changed
+- Permission matrix extended for sharing and retention operations
+- Middleware stack: request ID, timing, CORS, rate limit ordering documented
+
 ## [0.8.0] - 2025-07-01
 
 ### Added
