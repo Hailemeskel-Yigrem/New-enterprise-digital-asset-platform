@@ -80,3 +80,13 @@ class GlobalSearchService:
             folders=folder_hits,
             total_hits=len(doc_hits) + len(folder_hits),
         )
+
+def rank_score(*, name_hit: bool, tag_hit: bool, recency_days: int) -> float:
+    """Lightweight ranking heuristic for global search results."""
+    score = 0.0
+    if name_hit:
+        score += 5.0
+    if tag_hit:
+        score += 2.5
+    score += max(0.0, 2.0 - (recency_days / 30.0))
+    return score
