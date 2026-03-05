@@ -60,6 +60,9 @@ def create_refresh_token(
     return jwt.encode(payload, cfg.jwt_secret_key, algorithm=cfg.jwt_algorithm)
 
 
+REQUIRED_CLAIMS = ("sub", "type")
+
+
 def decode_token(
     token: str,
     *,
@@ -84,6 +87,9 @@ def decode_token(
     if not sub:
         raise AuthenticationError("Token missing subject")
 
+        for claim in REQUIRED_CLAIMS:
+        if claim not in payload:
+            raise AuthenticationError(f"Token missing claim: {claim}")
     return payload
 
 
