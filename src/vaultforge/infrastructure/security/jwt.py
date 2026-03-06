@@ -13,6 +13,7 @@ from vaultforge.core.exceptions import AuthenticationError
 
 TOKEN_TYPE_ACCESS = "access"
 TOKEN_TYPE_REFRESH = "refresh"
+REQUIRED_CLAIMS = ("sub", "type")
 
 
 def _now() -> datetime:
@@ -60,9 +61,6 @@ def create_refresh_token(
     return jwt.encode(payload, cfg.jwt_secret_key, algorithm=cfg.jwt_algorithm)
 
 
-REQUIRED_CLAIMS = ("sub", "type")
-
-
 def decode_token(
     token: str,
     *,
@@ -80,16 +78,13 @@ def decode_token(
     except JWTError as exc:
         raise AuthenticationError("Invalid or expired token") from exc
 
+    for claim in REQUIRED_CLAIMS:
+        if claim not in payload:
+            raise AuthenticationError(f"Token missing claim: {claim}")
+
     if expected_type is not None and payload.get("type") != expected_type:
         raise AuthenticationError("Invalid token type")
 
-    sub = payload.get("sub")
-    if not sub:
-        raise AuthenticationError("Token missing subject")
-
-        for claim in REQUIRED_CLAIMS:
-        if claim not in payload:
-            raise AuthenticationError(f"Token missing claim: {claim}")
     return payload
 
 
