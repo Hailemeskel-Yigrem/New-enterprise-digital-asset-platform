@@ -107,3 +107,19 @@ class FolderService:
         if folder is None:
             raise NotFoundError("Folder not found")
         return folder
+
+    async def _would_create_cycle(self, folder_id, new_parent_id, organization_id) -> bool:
+        """Walk ancestors to ensure new_parent is not a descendant of folder."""
+        current = new_parent_id
+        seen: set = set()
+        while current is not None:
+            if current == folder_id:
+                return True
+            if current in seen:
+                break
+            seen.add(current)
+            parent = await self._folders.get_by_id(current)
+            if parent is None or parent.organization_id != organization_id:
+                break
+            current = parent.parent_id
+        return False
