@@ -91,3 +91,14 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()  # type: ignore[call-arg]
+
+
+def validate_production_secrets(settings: Settings) -> None:
+    """Fail fast when production is configured with weak secrets."""
+    if not settings.is_production:
+        return
+    weak = ("change-me", "secret", "password")
+    for value in (settings.app_secret_key, settings.jwt_secret_key):
+        lowered = value.lower()
+        if any(token in lowered for token in weak) or len(value) < 32:
+            raise ValueError("Production secrets must be strong random values (32+ chars)")
