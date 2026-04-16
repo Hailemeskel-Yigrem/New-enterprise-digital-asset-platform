@@ -107,3 +107,15 @@ docs/             Setup, development, deployment, API reference
 ## License
 
 Proprietary - internal enterprise use.
+
+## Compose profiles
+
+```bash
+# Infrastructure only
+docker compose up -d postgres redis rabbitmq
+
+# Full stack (API, workers, nginx)
+docker compose up -d --build
+```
+
+Demo credentials after seeding: `owner@acme-demo.local` / `ChangeMe123!`
