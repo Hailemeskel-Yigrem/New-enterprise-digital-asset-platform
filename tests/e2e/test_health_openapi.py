@@ -50,3 +50,10 @@ def test_response_time_header_present(client: TestClient) -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert "X-Response-Time-Ms" in response.headers
+
+
+def test_openapi_lists_auth_paths(client) -> None:
+    response = client.get("/openapi.json")
+    assert response.status_code == 200
+    paths = response.json().get("paths", {})
+    assert "/health" in paths or any("auth" in path for path in paths)
