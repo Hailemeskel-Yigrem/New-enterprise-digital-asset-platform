@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-vault-950 vault-pattern">
+    <div className="motion-safe:transition-opacity relative min-h-screen overflow-hidden bg-vault-950 vault-pattern">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-vault-900/40 via-transparent to-vault-950" />
       <div className="pointer-events-none absolute -right-32 top-1/4 h-96 w-96 rounded-full bg-teal-900/20 blur-3xl" />
       <div className="pointer-events-none absolute -left-24 bottom-1/4 h-80 w-80 rounded-full bg-cyan-900/10 blur-3xl" />
