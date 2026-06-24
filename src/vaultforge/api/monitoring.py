@@ -77,3 +77,10 @@ async def health_dependencies() -> DependencyHealthResponse:
 
     overall = "ok" if all(item.status == "ok" for item in dependencies) else "degraded"
     return DependencyHealthResponse(status=overall, dependencies=dependencies)
+
+
+def format_dependency_probe(name: str, ok: bool, latency_ms: float | None = None) -> dict[str, object]:
+    payload: dict[str, object] = {"name": name, "ok": ok}
+    if latency_ms is not None:
+        payload["latency_ms"] = round(latency_ms, 2)
+    return payload
