@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 
 from vaultforge.infrastructure.cache import get_redis_client
-from vaultforge.infrastructure.persistence.session import engine
+from vaultforge.infrastructure.persistence.session import get_engine
 
 router = APIRouter(tags=["monitoring"])
 
@@ -58,7 +58,7 @@ async def health_dependencies() -> DependencyHealthResponse:
     dependencies: list[DependencyStatus] = []
 
     try:
-        async with engine.connect() as connection:
+        async with get_engine().connect() as connection:
             await connection.execute(text("SELECT 1"))
         dependencies.append(DependencyStatus(name="database", status="ok"))
     except Exception as exc:
