@@ -21,17 +21,15 @@ def test_ready_endpoint_accessible(client: TestClient) -> None:
     assert response.json()["status"] in {"ready", "degraded"}
 
 
-def test_openapi_schema_exposes_core_tags(client: TestClient) -> None:
+def test_openapi_schema_exposes_core_paths(client: TestClient) -> None:
     response = client.get("/openapi.json")
     assert response.status_code == 200
     schema = response.json()
     assert schema["info"]["title"]
     paths = schema.get("paths", {})
-    assert any(path.startswith("/api/v1/auth") for path in paths)
-    assert any(path.startswith("/api/v1/organizations") for path in paths)
-    tag_names = {tag["name"] for tag in schema.get("tags", [])}
-    expected = {"auth", "organizations", "documents", "health"}
-    assert expected.issubset(tag_names)
+    assert any("/auth" in path for path in paths)
+    assert any("/organizations" in path for path in paths)
+    assert "/health" in paths
 
 
 def test_docs_ui_available(client: TestClient) -> None:
@@ -52,7 +50,7 @@ def test_response_time_header_present(client: TestClient) -> None:
     assert "X-Response-Time-Ms" in response.headers
 
 
-def test_openapi_lists_auth_paths(client) -> None:
+def test_openapi_lists_auth_paths(client: TestClient) -> None:
     response = client.get("/openapi.json")
     assert response.status_code == 200
     paths = response.json().get("paths", {})

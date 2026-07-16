@@ -81,10 +81,6 @@ class PermissionResolver:
     ) -> EffectivePermissionResult:
         reference = at or utc_now()
 
-        rbac = self._evaluate_rbac(principal, required)
-        if rbac is not None:
-            return rbac
-
         acl_entries = self._matching_acl(principal, resource_type, resource_id)
         if acl_entries:
             allowed = merge_acl_entries(acl_entries, required)
@@ -95,6 +91,10 @@ class PermissionResolver:
                     deny_reason="Explicit ACL denies access",
                 )
             return EffectivePermissionResult(allowed=True, source="acl", granted=required)
+
+        rbac = self._evaluate_rbac(principal, required)
+        if rbac is not None:
+            return rbac
 
         share_perm = self._best_share_permission(
             principal, resource_type, resource_id, reference

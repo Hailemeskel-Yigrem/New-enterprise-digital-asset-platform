@@ -39,8 +39,8 @@ def test_set_and_get_context_values() -> None:
 
 
 def test_reset_context_restores_prior_value() -> None:
-    token = set_request_id("first")
-    set_request_id("second")
+    set_request_id("first")
+    token = set_request_id("second")
     assert get_request_id() == "second"
 
     reset_request_id(token)
