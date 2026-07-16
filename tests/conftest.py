@@ -24,6 +24,9 @@ def _test_env() -> None:
     os.environ.setdefault("JWT_SECRET_KEY", "test-jwt-secret-key-32chars-min!!")
     os.environ.setdefault("APP_ENV", "test")
     os.environ.setdefault("APP_DEBUG", "true")
+    from vaultforge.core.config import clear_settings_cache
+
+    clear_settings_cache()
     os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 

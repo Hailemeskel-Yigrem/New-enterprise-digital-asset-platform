@@ -35,7 +35,7 @@ class OrganizationSettingsUpdate(BaseModel):
     extra: dict | None = None
 
 
-@dataclass(slots=True)
+@dataclass
 class SettingsRepository:
     session: AsyncSession
 

@@ -38,14 +38,14 @@ def test_share_grant_external_email() -> None:
 
 def test_share_grant_revoke() -> None:
     actor = uuid.uuid4()
-    grant = ShareGrant(granted_by=actor)
+    grant = ShareGrant(granted_by=actor, target_id=uuid.uuid4())
     grant.revoke(actor)
     assert grant.status == ShareStatus.REVOKED
     assert grant.revoked_by == actor
 
 
 def test_share_grant_extend_expiry() -> None:
-    grant = ShareGrant(status=ShareStatus.EXPIRED)
+    grant = ShareGrant(status=ShareStatus.EXPIRED, target_id=uuid.uuid4())
     grant.extend_expiry(7)
     assert grant.status == ShareStatus.ACTIVE
     assert grant.expires_at is not None

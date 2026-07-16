@@ -202,8 +202,12 @@ async def test_upload_normalizes_tags_and_stores_version() -> None:
     folders.get_by_id = AsyncMock(return_value=folder)
     documents = AsyncMock()
     saved_doc = _document(organization_id=org_id, folder_id=folder.id, created_by=user_id)
-    documents.add = AsyncMock(return_value=saved_doc)
-    documents.update = AsyncMock(return_value=saved_doc)
+    async def _add_doc(doc):
+        return doc
+    documents.add = AsyncMock(side_effect=_add_doc)
+    async def _upd_doc(doc):
+        return doc
+    documents.update = AsyncMock(side_effect=_upd_doc)
     versions = AsyncMock()
     saved_version = DocumentVersion(
         id=uuid.uuid4(),
@@ -215,7 +219,9 @@ async def test_upload_normalizes_tags_and_stores_version() -> None:
         created_at=_now(),
         updated_at=_now(),
     )
-    versions.add = AsyncMock(return_value=saved_version)
+    async def _add_ver(ver):
+        return ver
+    versions.add = AsyncMock(side_effect=_add_ver)
     storage = AsyncMock()
     service = _service(folders=folders, documents=documents, versions=versions, storage=storage)
 

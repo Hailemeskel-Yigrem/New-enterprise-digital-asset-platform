@@ -1,9 +1,10 @@
 """Application settings loaded from environment variables."""
 
 from functools import lru_cache
+from typing import Annotated
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -41,17 +42,17 @@ class Settings(BaseSettings):
     storage_local_path: str = "./storage"
     storage_max_upload_mb: int = 100
 
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    cors_origins: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["http://localhost:3000"])
 
     oauth_issuer_base: str = "http://localhost:8000"
     oauth_default_client_id: str = "vaultforge-web"
     oauth_default_client_secret: str = "vaultforge-web-secret"
-    oauth_redirect_uris: list[str] = Field(
+    oauth_redirect_uris: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: ["http://localhost:3000/oauth/callback"]
     )
     oauth_google_client_id: str = ""
     oauth_google_client_secret: str | None = None
-    oauth_google_redirect_uris: list[str] = Field(
+    oauth_google_redirect_uris: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: ["http://localhost:3000/oauth/google/callback"]
     )
 
@@ -102,3 +103,8 @@ def validate_production_secrets(settings: Settings) -> None:
         lowered = value.lower()
         if any(token in lowered for token in weak) or len(value) < 32:
             raise ValueError("Production secrets must be strong random values (32+ chars)")
+
+
+def clear_settings_cache() -> None:
+    get_settings.cache_clear()
+
