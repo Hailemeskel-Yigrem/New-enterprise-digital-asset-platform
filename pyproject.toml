@@ -40,6 +40,7 @@ types-passlib = "^1.7.7"
 types-python-jose = "^3.3.4"
 factory-boy = "^3.3.1"
 faker = "^33.0.0"
+aiosqlite = "^0.20.0"
 
 [tool.poetry.scripts]
 vaultforge = "vaultforge.main:run"
@@ -62,6 +63,19 @@ src = ["src", "tests"]
 select = ["E", "F", "I", "N", "UP", "B", "SIM", "ASYNC"]
 ignore = ["E501"]
 
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Header",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Body",
+    "fastapi.Form",
+    "fastapi.File",
+    "fastapi.Cookie",
+    "fastapi.Security",
+]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
@@ -70,6 +84,18 @@ warn_unused_configs = true
 plugins = ["pydantic.mypy"]
 mypy_path = "src"
 packages = ["vaultforge"]
+
+# Third-party packages that ship no inline types and have no published stubs.
+# Silencing these avoids noise unrelated to our own type safety.
+[[tool.mypy.overrides]]
+module = ["celery.*", "boto3.*", "botocore.*"]
+ignore_missing_imports = true
+
+# Celery task decorators are untyped since celery ships no py.typed marker;
+# strict mode would otherwise flag every @shared_task-decorated function.
+[[tool.mypy.overrides]]
+module = ["vaultforge.infrastructure.messaging.tasks"]
+disallow_untyped_decorators = false
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
