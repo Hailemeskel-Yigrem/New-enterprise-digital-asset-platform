@@ -10,10 +10,13 @@ from vaultforge.api.v1 import (
     analytics,
     audit,
     auth,
+    billing,
     comments,
+    compliance,
     documents,
     folders,
     jobs,
+    metadata,
     notifications,
     oauth,
     organizations,
@@ -26,6 +29,7 @@ from vaultforge.api.v1 import (
     signatures,
     teams,
     users,
+    webhooks,
     workflows,
 )
 
@@ -39,6 +43,10 @@ api_v1_router.include_router(folders.router)
 api_v1_router.include_router(documents.router)
 api_v1_router.include_router(shares.router)
 api_v1_router.include_router(retention.router)
+api_v1_router.include_router(metadata.router)
+api_v1_router.include_router(compliance.router)
+api_v1_router.include_router(billing.router)
+api_v1_router.include_router(webhooks.router)
 api_v1_router.include_router(jobs.router)
 api_v1_router.include_router(workflows.router)
 api_v1_router.include_router(signatures.router)
