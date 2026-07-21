@@ -62,16 +62,16 @@ async def health_dependencies() -> DependencyHealthResponse:
             await connection.execute(text("SELECT 1"))
         dependencies.append(DependencyStatus(name="database", status="ok"))
     except Exception as exc:
-        dependencies.append(
-            DependencyStatus(name="database", status="error", detail=str(exc))
-        )
+        dependencies.append(DependencyStatus(name="database", status="error", detail=str(exc)))
 
     try:
         redis = get_redis_client()
         if await redis.ping():
             dependencies.append(DependencyStatus(name="redis", status="ok"))
         else:
-            dependencies.append(DependencyStatus(name="redis", status="error", detail="ping failed"))
+            dependencies.append(
+                DependencyStatus(name="redis", status="error", detail="ping failed")
+            )
     except Exception as exc:
         dependencies.append(DependencyStatus(name="redis", status="error", detail=str(exc)))
 
@@ -79,7 +79,9 @@ async def health_dependencies() -> DependencyHealthResponse:
     return DependencyHealthResponse(status=overall, dependencies=dependencies)
 
 
-def format_dependency_probe(name: str, ok: bool, latency_ms: float | None = None) -> dict[str, object]:
+def format_dependency_probe(
+    name: str, ok: bool, latency_ms: float | None = None
+) -> dict[str, object]:
     payload: dict[str, object] = {"name": name, "ok": ok}
     if latency_ms is not None:
         payload["latency_ms"] = round(latency_ms, 2)

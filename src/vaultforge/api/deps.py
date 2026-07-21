@@ -90,7 +90,7 @@ async def get_current_user(
         return await auth_service.get_user(user_id)
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc
 
 
 def require_permission(permission: Permission) -> Callable[..., object]:

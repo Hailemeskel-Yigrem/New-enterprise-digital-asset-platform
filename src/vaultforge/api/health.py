@@ -36,16 +36,16 @@ async def _check_dependencies() -> list[DependencyStatus]:
             await connection.execute(text("SELECT 1"))
         dependencies.append(DependencyStatus(name="database", status="ok"))
     except Exception as exc:
-        dependencies.append(
-            DependencyStatus(name="database", status="error", detail=str(exc))
-        )
+        dependencies.append(DependencyStatus(name="database", status="error", detail=str(exc)))
 
     try:
         redis = get_redis_client()
         if await redis.ping():
             dependencies.append(DependencyStatus(name="redis", status="ok"))
         else:
-            dependencies.append(DependencyStatus(name="redis", status="error", detail="ping failed"))
+            dependencies.append(
+                DependencyStatus(name="redis", status="error", detail="ping failed")
+            )
     except Exception as exc:
         dependencies.append(DependencyStatus(name="redis", status="error", detail=str(exc)))
 

@@ -6,6 +6,9 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
 from vaultforge.core.exceptions import VaultForgeError
+from vaultforge.core.logging import get_logger
+
+log = get_logger("vaultforge.api.errors")
 
 
 def _status_for_code(code: str) -> int:
@@ -25,5 +28,29 @@ async def vaultforge_error_handler(_: Request, exc: VaultForgeError) -> JSONResp
     )
 
 
+async def unhandled_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    log.error(
+        "unhandled_exception",
+        path=request.url.path,
+        method=request.method,
+        error=str(exc),
+        error_type=type(exc).__name__,
+    )
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "code": "internal_error",
+            "message": "An unexpected error occurred while processing the request.",
+        },
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
-    app.add_exception_handler(VaultForgeError, vaultforge_error_handler)
+    # Starlette's typing models exception handlers as taking the base
+    # `Exception` type; the concrete handlers below are only ever invoked
+    # with instances of the exception class they were registered for.
+    app.add_exception_handler(
+        VaultForgeError,
+        vaultforge_error_handler,  # type: ignore[arg-type]
+    )
+    app.add_exception_handler(Exception, unhandled_error_handler)

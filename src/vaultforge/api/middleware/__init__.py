@@ -1,9 +1,9 @@
 """API middleware package."""
 
 from vaultforge.api.middleware.rate_limit import (
+    RateLimiter,
     RateLimitMiddleware,
     RateLimitRule,
-    RateLimiter,
     create_rate_limit_middleware,
 )
 from vaultforge.api.middleware.request_id import RequestIdMiddleware

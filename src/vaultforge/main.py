@@ -8,9 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from vaultforge import __version__
 from vaultforge.api.errors import register_exception_handlers
-from vaultforge.api.middleware.rate_limit import RateLimitMiddleware
-from vaultforge.api.middleware import RequestIdMiddleware, TimingMiddleware
 from vaultforge.api.health import router as health_router
+from vaultforge.api.middleware import RequestIdMiddleware, TimingMiddleware
+from vaultforge.api.middleware.rate_limit import RateLimitMiddleware
 from vaultforge.api.monitoring import router as monitoring_router
 from vaultforge.api.v1.router import api_v1_router
 from vaultforge.api.ws.notifications import router as ws_router
