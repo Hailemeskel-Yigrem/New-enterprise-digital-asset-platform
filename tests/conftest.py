@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import uuid
 from collections.abc import Iterator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
@@ -59,7 +59,7 @@ def sample_request_id() -> str:
 
 @pytest.fixture
 def sample_user_response(sample_user_id: uuid.UUID) -> UserResponse:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return UserResponse(
         id=sample_user_id,
         email="tester@example.com",

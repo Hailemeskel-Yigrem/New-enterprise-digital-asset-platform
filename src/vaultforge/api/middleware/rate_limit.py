@@ -39,9 +39,7 @@ class RateLimitRule:
     def matches(self, request: Request) -> bool:
         if self.path_prefix and not request.url.path.startswith(self.path_prefix):
             return False
-        if self.methods and request.method.upper() not in self.methods:
-            return False
-        return True
+        return not (self.methods and request.method.upper() not in self.methods)
 
 
 @dataclass(slots=True)
@@ -56,9 +54,7 @@ class InMemoryRateLimitStore:
     def __init__(self) -> None:
         self._buckets: dict[str, RateLimitState] = {}
 
-    async def increment(
-        self, key: str, window_seconds: int
-    ) -> tuple[int, int]:
+    async def increment(self, key: str, window_seconds: int) -> tuple[int, int]:
         now = time.time()
         state = self._buckets.get(key)
         if state is None or now - state.window_start >= window_seconds:
@@ -79,9 +75,7 @@ class RedisRateLimitStore:
         self._redis = redis_client
         self._prefix = key_prefix
 
-    async def increment(
-        self, key: str, window_seconds: int
-    ) -> tuple[int, int]:
+    async def increment(self, key: str, window_seconds: int) -> tuple[int, int]:
         full_key = f"{self._prefix}{key}"
         pipe = self._redis._redis.pipeline()
         pipe.incr(full_key)

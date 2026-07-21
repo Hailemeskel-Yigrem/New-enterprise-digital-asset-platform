@@ -42,7 +42,9 @@ class Settings(BaseSettings):
     storage_local_path: str = "./storage"
     storage_max_upload_mb: int = 100
 
-    cors_origins: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["http://localhost:3000"])
+    cors_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["http://localhost:3000"]
+    )
 
     oauth_issuer_base: str = "http://localhost:8000"
     oauth_default_client_id: str = "vaultforge-web"
@@ -91,7 +93,7 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()  # type: ignore[call-arg]
+    return Settings()
 
 
 def validate_production_secrets(settings: Settings) -> None:
@@ -107,4 +109,3 @@ def validate_production_secrets(settings: Settings) -> None:
 
 def clear_settings_cache() -> None:
     get_settings.cache_clear()
-
