@@ -60,7 +60,9 @@ def upgrade() -> None:
         sa.Column("name", sa.String(length=512), nullable=False),
         sa.Column("status", sa.String(length=32), nullable=False, server_default="draft"),
         sa.Column("sensitivity", sa.String(length=32), nullable=False, server_default="internal"),
-        sa.Column("tags", postgresql.ARRAY(sa.String(length=64)), nullable=False, server_default="{}"),
+        sa.Column(
+            "tags", postgresql.ARRAY(sa.String(length=64)), nullable=False, server_default="{}"
+        ),
         sa.Column("current_version_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("created_by", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
@@ -122,9 +124,7 @@ def upgrade() -> None:
             "document_id", "version_number", name="uq_document_versions_doc_version"
         ),
     )
-    op.create_index(
-        op.f("ix_document_versions_document_id"), "document_versions", ["document_id"]
-    )
+    op.create_index(op.f("ix_document_versions_document_id"), "document_versions", ["document_id"])
 
     op.create_foreign_key(
         op.f("fk_documents_current_version"),

@@ -22,9 +22,18 @@ def upgrade() -> None:
         "organization_settings",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("organization_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("default_sensitivity", sa.String(length=32), nullable=False, server_default="internal"),
-        sa.Column("require_version_approval", sa.Boolean(), nullable=False, server_default=sa.text("false")),
-        sa.Column("notifications_enabled", sa.Boolean(), nullable=False, server_default=sa.text("true")),
+        sa.Column(
+            "default_sensitivity", sa.String(length=32), nullable=False, server_default="internal"
+        ),
+        sa.Column(
+            "require_version_approval",
+            sa.Boolean(),
+            nullable=False,
+            server_default=sa.text("false"),
+        ),
+        sa.Column(
+            "notifications_enabled", sa.Boolean(), nullable=False, server_default=sa.text("true")
+        ),
         sa.Column("max_upload_mb", sa.Integer(), nullable=False, server_default="100"),
         sa.Column("retention_days", sa.Integer(), nullable=False, server_default="365"),
         sa.Column("extra", postgresql.JSONB(), nullable=False, server_default="{}"),
