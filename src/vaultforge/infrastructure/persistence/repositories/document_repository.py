@@ -98,7 +98,9 @@ class SqlAlchemyDocumentRepository(DocumentRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def get_by_id(self, organization_id: uuid.UUID, document_id: uuid.UUID) -> Document | None:
+    async def get_by_id(
+        self, organization_id: uuid.UUID, document_id: uuid.UUID
+    ) -> Document | None:
         stmt = select(DocumentModel).where(
             DocumentModel.id == document_id,
             DocumentModel.organization_id == organization_id,
@@ -148,7 +150,11 @@ class SqlAlchemyDocumentRepository(DocumentRepository):
             stmt = stmt.where(DocumentModel.folder_id == criteria.folder_id)
         if criteria.tags:
             stmt = stmt.where(DocumentModel.tags.contains(list(criteria.tags)))
-        stmt = stmt.order_by(DocumentModel.updated_at.desc()).limit(criteria.limit).offset(criteria.offset)
+        stmt = (
+            stmt.order_by(DocumentModel.updated_at.desc())
+            .limit(criteria.limit)
+            .offset(criteria.offset)
+        )
         result = await self._session.execute(stmt)
         return [_document_to_entity(row) for row in result.scalars().all()]
 

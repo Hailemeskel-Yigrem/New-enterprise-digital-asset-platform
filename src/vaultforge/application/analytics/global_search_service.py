@@ -35,7 +35,9 @@ class GlobalSearchService:
                 DocumentModel.status != DocumentStatus.DELETED.value,
                 or_(
                     DocumentModel.name.ilike(pattern),
-                    DocumentModel.tags.any(payload.query.strip().lower()),
+                    # ARRAY.any() takes a scalar value; the generic PropComparator
+                    # stub only models the relationship-criterion overload.
+                    DocumentModel.tags.any(payload.query.strip().lower()),  # type: ignore[arg-type]
                 ),
             )
             .order_by(DocumentModel.updated_at.desc())
@@ -80,6 +82,7 @@ class GlobalSearchService:
             folders=folder_hits,
             total_hits=len(doc_hits) + len(folder_hits),
         )
+
 
 def rank_score(*, name_hit: bool, tag_hit: bool, recency_days: int) -> float:
     """Lightweight ranking heuristic for global search results."""

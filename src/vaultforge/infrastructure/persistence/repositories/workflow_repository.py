@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -195,7 +196,7 @@ class SqlAlchemyWorkflowStepRepository(WorkflowStepRepository):
         saved = list(await self.add_many([step]))
         return saved[0]
 
-    async def add_many(self, steps: list[WorkflowStep]) -> list[WorkflowStep]:
+    async def add_many(self, steps: Sequence[WorkflowStep]) -> list[WorkflowStep]:
         models = [
             WorkflowStepModel(
                 id=step.id,
@@ -288,7 +289,7 @@ class SqlAlchemyStepInstanceRepository(StepInstanceRepository):
         result = await self._session.execute(stmt)
         return [_step_instance_to_entity(model) for model in result.scalars().all()]
 
-    async def add_many(self, steps: list[StepInstance]) -> list[StepInstance]:
+    async def add_many(self, steps: Sequence[StepInstance]) -> list[StepInstance]:
         models = [
             StepInstanceModel(
                 id=step.id,

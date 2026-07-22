@@ -61,9 +61,7 @@ async def record_audit_event(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> AuditEventResponse:
     try:
-        return await service.record_event(
-            organization_id, _resolve_user_id(x_user_id), payload
-        )
+        return await service.record_event(organization_id, _resolve_user_id(x_user_id), payload)
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 

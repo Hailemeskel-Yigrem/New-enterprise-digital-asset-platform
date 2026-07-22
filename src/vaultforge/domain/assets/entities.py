@@ -35,7 +35,9 @@ class Folder(Entity):
         self.name = _require_non_empty(new_name, "Folder name")
         self.touch()
 
-    def move(self, new_parent_id: uuid.UUID | None, *, descendant_ids: frozenset[uuid.UUID]) -> None:
+    def move(
+        self, new_parent_id: uuid.UUID | None, *, descendant_ids: frozenset[uuid.UUID]
+    ) -> None:
         if new_parent_id == self.id:
             raise ValidationError("A folder cannot be moved into itself")
         if new_parent_id is not None and new_parent_id in descendant_ids:
@@ -74,9 +76,7 @@ class DocumentLock(Entity):
 
     def is_active(self, *, now: datetime | None = None) -> bool:
         reference = now or utc_now()
-        if self.expires_at is not None and reference >= self.expires_at:
-            return False
-        return True
+        return not (self.expires_at is not None and reference >= self.expires_at)
 
 
 @dataclass(slots=True)

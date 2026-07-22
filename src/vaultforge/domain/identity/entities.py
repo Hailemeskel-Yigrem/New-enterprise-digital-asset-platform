@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 
 from vaultforge.domain.common import Entity
-from vaultforge.domain.identity.enums import MembershipStatus, OrgRole, Permission, ROLE_PERMISSIONS
+from vaultforge.domain.identity.enums import ROLE_PERMISSIONS, MembershipStatus, OrgRole, Permission
 
 
 @dataclass(slots=True)
@@ -25,7 +26,7 @@ class User(Entity):
     password_hash: str = ""
     is_active: bool = True
     is_email_verified: bool = False
-    last_login_at: object | None = None
+    last_login_at: datetime | None = None
 
 
 @dataclass(slots=True)

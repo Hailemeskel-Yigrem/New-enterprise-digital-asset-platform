@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import func, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vaultforge.application.analytics.schemas import (
@@ -118,10 +118,10 @@ class DashboardService:
         items.sort(key=lambda item: item.occurred_at, reverse=True)
         return items[:15]
 
-    async def _scalar_count(self, stmt) -> int:
+    async def _scalar_count(self, stmt: Select[tuple[int]]) -> int:
         result = await self._session.execute(stmt)
         return int(result.scalar_one())
 
-    async def _scalar_sum(self, stmt) -> int:
+    async def _scalar_sum(self, stmt: Select[tuple[int]]) -> int:
         result = await self._session.execute(stmt)
         return int(result.scalar_one())

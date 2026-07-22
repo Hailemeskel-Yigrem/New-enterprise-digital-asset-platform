@@ -71,9 +71,7 @@ async def define_workflow(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> WorkflowResponse:
     try:
-        return await service.define_template(
-            organization_id, _resolve_user_id(x_user_id), payload
-        )
+        return await service.define_template(organization_id, _resolve_user_id(x_user_id), payload)
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 
@@ -89,7 +87,9 @@ async def list_workflows(
         raise _http_error(exc) from exc
 
 
-@router.post("/instances", response_model=WorkflowInstanceResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/instances", response_model=WorkflowInstanceResponse, status_code=status.HTTP_201_CREATED
+)
 async def start_workflow_instance(
     organization_id: uuid.UUID,
     payload: WorkflowInstanceStartRequest,
@@ -97,9 +97,7 @@ async def start_workflow_instance(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> WorkflowInstanceResponse:
     try:
-        return await service.start_instance(
-            organization_id, _resolve_user_id(x_user_id), payload
-        )
+        return await service.start_instance(organization_id, _resolve_user_id(x_user_id), payload)
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 

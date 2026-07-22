@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
@@ -13,6 +14,10 @@ from vaultforge.infrastructure.persistence.base import (
     TimestampMixin,
     UUIDPrimaryKeyMixin,
 )
+
+if TYPE_CHECKING:
+    from vaultforge.infrastructure.persistence.models.organization import OrganizationModel
+    from vaultforge.infrastructure.persistence.models.user import UserModel
 
 
 class MembershipModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -36,11 +41,11 @@ class MembershipModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     role: Mapped[str] = mapped_column(String(32), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False)
 
-    organization: Mapped["OrganizationModel"] = relationship(
+    organization: Mapped[OrganizationModel] = relationship(
         "OrganizationModel",
         back_populates="memberships",
     )
-    user: Mapped["UserModel"] = relationship(
+    user: Mapped[UserModel] = relationship(
         "UserModel",
         back_populates="memberships",
     )

@@ -28,9 +28,7 @@ def create_access_token(
 ) -> str:
     """Create a signed JWT access token for the given user."""
     cfg = settings or get_settings()
-    expire = _now() + (
-        expires_delta or timedelta(minutes=cfg.jwt_access_token_expire_minutes)
-    )
+    expire = _now() + (expires_delta or timedelta(minutes=cfg.jwt_access_token_expire_minutes))
     payload = {
         "sub": str(user_id),
         "type": TOKEN_TYPE_ACCESS,
@@ -48,9 +46,7 @@ def create_refresh_token(
 ) -> str:
     """Create a signed JWT refresh token for the given user."""
     cfg = settings or get_settings()
-    expire = _now() + (
-        expires_delta or timedelta(days=cfg.jwt_refresh_token_expire_days)
-    )
+    expire = _now() + (expires_delta or timedelta(days=cfg.jwt_refresh_token_expire_days))
     payload = {
         "sub": str(user_id),
         "type": TOKEN_TYPE_REFRESH,

@@ -15,7 +15,9 @@ from vaultforge.infrastructure.persistence.base import Base, TimestampMixin, UUI
 class SignatureRequestModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "signature_requests"
 
-    organization_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
     document_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     document_version_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     document_checksum: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -25,7 +27,7 @@ class SignatureRequestModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    signers: Mapped[list["SignerModel"]] = relationship(
+    signers: Mapped[list[SignerModel]] = relationship(
         "SignerModel",
         back_populates="request",
         cascade="all, delete-orphan",
@@ -35,9 +37,7 @@ class SignatureRequestModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
 class SignerModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "signers"
-    __table_args__ = (
-        UniqueConstraint("request_id", "order", name="uq_signers_request_order"),
-    )
+    __table_args__ = (UniqueConstraint("request_id", "order", name="uq_signers_request_order"),)
 
     request_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),

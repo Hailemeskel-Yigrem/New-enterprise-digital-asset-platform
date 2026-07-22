@@ -7,7 +7,12 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from vaultforge.domain.assets.enums import DocumentStatus, FolderKind, SensitivityLabel, VersionStatus
+from vaultforge.domain.assets.enums import (
+    DocumentStatus,
+    FolderKind,
+    SensitivityLabel,
+    VersionStatus,
+)
 
 
 class FolderCreateRequest(BaseModel):

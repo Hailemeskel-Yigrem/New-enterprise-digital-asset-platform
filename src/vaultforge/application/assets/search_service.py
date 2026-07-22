@@ -10,7 +10,11 @@ from vaultforge.application.assets.schemas import (
     DocumentSearchResponse,
     DocumentVersionResponse,
 )
-from vaultforge.domain.assets.repositories import DocumentRepository, DocumentSearchCriteria, DocumentVersionRepository
+from vaultforge.domain.assets.repositories import (
+    DocumentRepository,
+    DocumentSearchCriteria,
+    DocumentVersionRepository,
+)
 
 
 class SearchService:

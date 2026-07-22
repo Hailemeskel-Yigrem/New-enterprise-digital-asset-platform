@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from vaultforge.application.jobs.export_service import ExportJob, ExportFormat, ExportJobStatus
+from vaultforge.application.jobs.export_service import ExportFormat, ExportJob, ExportJobStatus
 from vaultforge.application.jobs.import_service import ImportJob, ImportJobStatus
 from vaultforge.infrastructure.persistence.models.share import ExportJobModel, ImportJobModel
 

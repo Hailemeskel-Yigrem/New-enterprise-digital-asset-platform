@@ -28,7 +28,7 @@ async def create_team(
         return await team_service.create_team(org_id, payload, current_user.id)
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc
 
 
 @router.get("", response_model=list[TeamResponse])
@@ -41,7 +41,7 @@ async def list_teams(
         return await team_service.list_teams(org_id, current_user.id)
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc
 
 
 @router.get("/{team_id}", response_model=TeamResponse)
@@ -55,7 +55,7 @@ async def get_team(
         return await team_service.get_team(org_id, team_id, current_user.id)
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc
 
 
 @router.post("/{team_id}/members", response_model=TeamResponse)
@@ -70,4 +70,4 @@ async def add_team_member(
         return await team_service.add_member(org_id, team_id, payload, current_user.id)
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc

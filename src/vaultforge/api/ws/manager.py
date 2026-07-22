@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 from collections import defaultdict
+from typing import Any
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect
@@ -27,7 +28,7 @@ class ConnectionManager:
         if not connections:
             self._connections.pop(organization_id, None)
 
-    async def broadcast(self, organization_id: uuid.UUID, message: dict) -> int:
+    async def broadcast(self, organization_id: uuid.UUID, message: dict[str, Any]) -> int:
         connections = list(self._connections.get(organization_id, set()))
         delivered = 0
         for websocket in connections:

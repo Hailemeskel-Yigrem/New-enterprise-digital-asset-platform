@@ -6,6 +6,7 @@ import uuid
 from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar, Token
+from typing import Any
 
 _org_id: ContextVar[uuid.UUID | None] = ContextVar("org_id", default=None)
 _user_id: ContextVar[uuid.UUID | None] = ContextVar("user_id", default=None)
@@ -63,7 +64,7 @@ def bind_context(
     request_id: str | None = None,
 ) -> Generator[None, None, None]:
     """Temporarily bind org/user/request IDs for the current async context."""
-    tokens: list[tuple[ContextVar, Token]] = []
+    tokens: list[tuple[ContextVar[Any], Token[Any]]] = []
     if org_id is not None:
         tokens.append((_org_id, set_org_id(org_id)))
     if user_id is not None:

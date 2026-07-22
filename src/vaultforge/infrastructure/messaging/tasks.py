@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import uuid
-from datetime import datetime, timezone
-from typing import Any
+from collections.abc import Awaitable, Callable, Coroutine
+from datetime import UTC, datetime
+from typing import Any, TypeVar
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -20,12 +21,14 @@ from vaultforge.infrastructure.persistence.models.document import DocumentLockMo
 
 log = get_logger(__name__)
 
+_T = TypeVar("_T")
 
-def _run_async(coro: Any) -> Any:
+
+def _run_async(coro: Coroutine[Any, Any, _T]) -> _T:
     return asyncio.run(coro)
 
 
-async def _with_session(callback: Any) -> Any:
+async def _with_session(callback: Callable[[AsyncSession], Awaitable[_T]]) -> _T:
     settings = get_settings()
     engine = create_async_engine(settings.database_url, pool_pre_ping=True)
     session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
@@ -124,7 +127,7 @@ def nightly_stats(organization_id: str | None = None) -> dict[str, Any]:
             )
         audit_count = (await session.execute(audit_stmt)).scalar_one()
 
-        generated_at = datetime.now(timezone.utc).isoformat()
+        generated_at = datetime.now(UTC).isoformat()
         stats = {
             "generated_at": generated_at,
             "organization_id": organization_id,
@@ -152,7 +155,11 @@ def queue_export_job(job_id: str) -> dict[str, str]:
         service = ExportService(SqlAlchemyExportJobRepository(session), StubDocumentExportSource())
         result = await service.run_export(uuid.UUID(job_id))
         log.info("export_job_task_completed", job_id=job_id, status=result.status.value)
-        return {"status": result.status.value, "job_id": job_id, "artifact": result.artifact_path or ""}
+        return {
+            "status": result.status.value,
+            "job_id": job_id,
+            "artifact": result.artifact_path or "",
+        }
 
     return _run_async(_with_session(_export))
 
@@ -185,6 +192,7 @@ def queue_import_job(job_id: str) -> dict[str, str]:
 
     return _run_async(_with_session(_import))
 
+
 @celery_app.task(name="vaultforge.infrastructure.messaging.tasks.process_retention_due")
 def process_retention_due() -> dict[str, int]:
     """Execute retention schedules that have reached their expiry time."""
@@ -213,7 +221,10 @@ def purge_expired_shares() -> dict[str, int]:
     """Mark expired share grants and links as expired."""
 
     async def _purge(session: AsyncSession) -> dict[str, int]:
-        from vaultforge.infrastructure.persistence.models.share import ShareGrantModel, ShareLinkModel
+        from vaultforge.infrastructure.persistence.models.share import (
+            ShareGrantModel,
+            ShareLinkModel,
+        )
 
         now = utc_now()
         grant_stmt = select(ShareGrantModel).where(

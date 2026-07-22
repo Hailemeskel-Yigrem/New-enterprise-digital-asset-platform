@@ -12,7 +12,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from vaultforge.core.config import get_settings
 from vaultforge.domain.assets.enums import FolderKind, SensitivityLabel
 from vaultforge.domain.identity.enums import MembershipStatus, OrgRole
-from vaultforge.infrastructure.persistence.models.document import DocumentModel, DocumentVersionModel
+from vaultforge.infrastructure.persistence.models.document import (
+    DocumentModel,
+    DocumentVersionModel,
+)
 from vaultforge.infrastructure.persistence.models.folder import FolderModel
 from vaultforge.infrastructure.persistence.models.membership import MembershipModel
 from vaultforge.infrastructure.persistence.models.organization import OrganizationModel

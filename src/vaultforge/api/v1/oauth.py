@@ -13,7 +13,9 @@ from vaultforge.api.deps import DbSession, _raise_http
 from vaultforge.application.identity.schemas import OAuthTokenResponse, OIDCDiscoveryResponse
 from vaultforge.core.config import get_settings
 from vaultforge.core.exceptions import VaultForgeError
-from vaultforge.infrastructure.persistence.repositories.user_repository import SqlAlchemyUserRepository
+from vaultforge.infrastructure.persistence.repositories.user_repository import (
+    SqlAlchemyUserRepository,
+)
 from vaultforge.infrastructure.security.oauth import OAuth2Facade, OAuthGrantType, get_oauth_facade
 
 router = APIRouter(prefix="/oauth", tags=["oauth"])
@@ -58,7 +60,9 @@ async def oauth_token(
     try:
         if grant_type == OAuthGrantType.PASSWORD:
             if not username or not password:
-                raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="username/password required")
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST, detail="username/password required"
+                )
             token = await oauth.password_handler.handle(
                 client_id=client_id,
                 client_secret=client_secret,
@@ -78,7 +82,9 @@ async def oauth_token(
             )
         elif grant_type == OAuthGrantType.AUTHORIZATION_CODE:
             if not code or not redirect_uri:
-                raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="code/redirect_uri required")
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST, detail="code/redirect_uri required"
+                )
             token = await oauth.auth_code_handler.handle(
                 client_id=client_id,
                 client_secret=client_secret,
@@ -88,7 +94,9 @@ async def oauth_token(
                 get_user_by_id=users.get_by_id,
             )
         else:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=f"Unsupported grant_type: {grant_type}")
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, detail=f"Unsupported grant_type: {grant_type}"
+            )
 
         return OAuthTokenResponse(
             access_token=token.access_token,
@@ -99,7 +107,7 @@ async def oauth_token(
         )
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc
 
 
 @router.get("/google/authorize")
@@ -167,7 +175,7 @@ async def google_callback(
         )
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc
 
 
 @router.get("/authorize")
@@ -184,7 +192,9 @@ async def authorize(
 ) -> dict[str, str]:
     if response_type != "code":
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Only code response_type supported")
-    user_id = uuid.UUID(x_user_id) if x_user_id else uuid.UUID("00000000-0000-0000-0000-000000000001")
+    user_id = (
+        uuid.UUID(x_user_id) if x_user_id else uuid.UUID("00000000-0000-0000-0000-000000000001")
+    )
     scopes = [s for s in scope.split() if s]
     auth_code = oauth.create_authorization_code(
         client_id=client_id,

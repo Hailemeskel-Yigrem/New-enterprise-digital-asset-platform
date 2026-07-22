@@ -55,9 +55,7 @@ async def list_notifications(
 ) -> list[NotificationResponse]:
     query = NotificationListQuery(unread_only=unread_only, limit=limit, offset=offset)
     try:
-        return await service.list_for_user(
-            organization_id, _resolve_user_id(x_user_id), query
-        )
+        return await service.list_for_user(organization_id, _resolve_user_id(x_user_id), query)
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 
@@ -84,9 +82,7 @@ async def mark_all_notifications_read(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> dict[str, int]:
     try:
-        count = await service.mark_all_read(
-            organization_id, _resolve_user_id(x_user_id)
-        )
+        count = await service.mark_all_read(organization_id, _resolve_user_id(x_user_id))
         return {"marked_read": count}
     except VaultForgeError as exc:
         raise _http_error(exc) from exc

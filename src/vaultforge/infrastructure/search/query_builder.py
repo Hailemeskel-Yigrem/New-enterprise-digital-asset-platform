@@ -48,13 +48,13 @@ class FilterOperator(StrEnum):
 
 @dataclass(slots=True)
 class FieldFilter:
-    field: str
+    field_name: str
     operator: FilterOperator
     value: Any = None
     values: list[Any] = field(default_factory=list)
 
     def validate(self) -> None:
-        if not self.field.strip():
+        if not self.field_name.strip():
             raise ValidationError("Filter field is required")
         if self.operator == FilterOperator.BETWEEN and len(self.values) != 2:
             raise ValidationError("BETWEEN filter requires exactly two values")
@@ -296,9 +296,7 @@ class SearchQueryBuilder:
         }
 
     def _build_filters(self, query: SearchQuery) -> list[dict[str, Any]]:
-        filters: list[dict[str, Any]] = [
-            {"term": {"organization_id": str(query.organization_id)}}
-        ]
+        filters: list[dict[str, Any]] = [{"term": {"organization_id": str(query.organization_id)}}]
         if query.resource_types:
             filters.append({"terms": {"resource_type": query.resource_types}})
         if query.folder_ids:
@@ -320,17 +318,17 @@ class SearchQueryBuilder:
 
     def _compile_filter(self, field_filter: FieldFilter) -> dict[str, Any]:
         if field_filter.operator == FilterOperator.EQ:
-            return {"term": {field_filter.field: field_filter.value}}
+            return {"term": {field_filter.field_name: field_filter.value}}
         if field_filter.operator == FilterOperator.NE:
-            return {"bool": {"must_not": [{"term": {field_filter.field: field_filter.value}}]}}
+            return {"bool": {"must_not": [{"term": {field_filter.field_name: field_filter.value}}]}}
         if field_filter.operator == FilterOperator.IN:
-            return {"terms": {field_filter.field: field_filter.values}}
+            return {"terms": {field_filter.field_name: field_filter.values}}
         if field_filter.operator == FilterOperator.EXISTS:
-            return {"exists": {"field": field_filter.field}}
+            return {"exists": {"field": field_filter.field_name}}
         if field_filter.operator == FilterOperator.BETWEEN:
             return {
                 "range": {
-                    field_filter.field: {
+                    field_filter.field_name: {
                         "gte": field_filter.values[0],
                         "lte": field_filter.values[1],
                     }
@@ -344,7 +342,7 @@ class SearchQueryBuilder:
         }
         op = op_map.get(field_filter.operator)
         if op:
-            return {"range": {field_filter.field: {op: field_filter.value}}}
+            return {"range": {field_filter.field_name: {op: field_filter.value}}}
         raise ValidationError(f"Unsupported filter operator: {field_filter.operator}")
 
     def _build_facet(self, facet: FacetRequest) -> dict[str, Any]:
@@ -391,7 +389,9 @@ class SearchQueryBuilder:
         }
         if built.facets:
             body["aggs"] = {
-                f"facet_{facet['field']}": {"terms": {"field": facet["field"], "size": facet["size"]}}
+                f"facet_{facet['field']}": {
+                    "terms": {"field": facet["field"], "size": facet["size"]}
+                }
                 for facet in built.facets
             }
         if built.highlight:

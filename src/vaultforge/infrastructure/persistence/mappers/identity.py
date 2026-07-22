@@ -20,7 +20,7 @@ def user_to_model(entity: User) -> UserModel:
         password_hash=entity.password_hash,
         is_active=entity.is_active,
         is_email_verified=entity.is_email_verified,
-        last_login_at=entity.last_login_at,  # type: ignore[arg-type]
+        last_login_at=entity.last_login_at,
         created_at=entity.created_at,
         updated_at=entity.updated_at,
     )
@@ -116,6 +116,7 @@ def team_from_model(model: TeamModel, *, member_ids: list[uuid.UUID] | None = No
 def team_member_to_model(team_id: uuid.UUID, user_id: uuid.UUID) -> TeamMemberModel:
     return TeamMemberModel(team_id=team_id, user_id=user_id)
 
+
 def users_from_models(models: list[UserModel]) -> list[User]:
     return [user_from_model(m) for m in models]
 
@@ -143,6 +144,6 @@ def merge_user_patch(model: UserModel, entity: User) -> UserModel:
     model.full_name = entity.full_name
     model.is_active = entity.is_active
     model.is_email_verified = entity.is_email_verified
-    model.last_login_at = entity.last_login_at  # type: ignore[assignment]
+    model.last_login_at = entity.last_login_at
     model.updated_at = entity.updated_at
     return model

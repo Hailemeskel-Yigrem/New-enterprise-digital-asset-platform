@@ -23,7 +23,7 @@ async def register(payload: RegisterRequest, auth_service: AuthServiceDep) -> Us
         return await auth_service.register(payload)
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -32,7 +32,7 @@ async def login(payload: LoginRequest, auth_service: AuthServiceDep) -> TokenRes
         return await auth_service.login(payload)
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc
 
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -41,7 +41,7 @@ async def refresh(payload: RefreshRequest, auth_service: AuthServiceDep) -> Toke
         return await auth_service.refresh(payload)
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc
 
 
 @router.get("/me", response_model=UserResponse)

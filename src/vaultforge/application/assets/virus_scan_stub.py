@@ -6,7 +6,7 @@ import hashlib
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 
 from vaultforge.core.logging import get_logger
@@ -36,7 +36,7 @@ class ScanRequest:
 class ScanResult:
     verdict: ScanVerdict
     scanner: str
-    scanned_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    scanned_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     threat_name: str | None = None
     detail: str = ""
     duration_ms: int = 0
@@ -69,7 +69,7 @@ class LocalStubVirusScanner(VirusScanner):
     )
 
     async def scan(self, request: ScanRequest, *, data: bytes | None = None) -> ScanResult:
-        started = datetime.now(timezone.utc)
+        started = datetime.now(UTC)
         log.info(
             "virus_scan_started",
             document_id=str(request.document_id),
@@ -87,7 +87,7 @@ class LocalStubVirusScanner(VirusScanner):
 
         for marker in self.INFECTED_MARKERS:
             if marker in data:
-                duration = int((datetime.now(timezone.utc) - started).total_seconds() * 1000)
+                duration = int((datetime.now(UTC) - started).total_seconds() * 1000)
                 log.warning(
                     "virus_scan_infected",
                     document_id=str(request.document_id),
@@ -103,7 +103,7 @@ class LocalStubVirusScanner(VirusScanner):
 
         digest = hashlib.sha256(data).hexdigest()
         if digest != request.checksum_sha256:
-            duration = int((datetime.now(timezone.utc) - started).total_seconds() * 1000)
+            duration = int((datetime.now(UTC) - started).total_seconds() * 1000)
             return ScanResult(
                 verdict=ScanVerdict.ERROR,
                 scanner=self.SCANNER_NAME,
@@ -111,7 +111,7 @@ class LocalStubVirusScanner(VirusScanner):
                 duration_ms=duration,
             )
 
-        duration = int((datetime.now(timezone.utc) - started).total_seconds() * 1000)
+        duration = int((datetime.now(UTC) - started).total_seconds() * 1000)
         log.info(
             "virus_scan_clean",
             document_id=str(request.document_id),
@@ -128,10 +128,11 @@ def get_default_scanner() -> VirusScanner:
     """Return the configured scanner implementation."""
     return LocalStubVirusScanner()
 
+
 @dataclass(slots=True)
 class QueuedScan:
     request: ScanRequest
-    enqueued_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    enqueued_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class ScanQueue:
@@ -171,6 +172,7 @@ class QueuedStubVirusScanner(LocalStubVirusScanner):
 
 def get_scanner_with_queue() -> QueuedStubVirusScanner:
     return QueuedStubVirusScanner()
+
 
 class NoOpVirusScanner(VirusScanner):
     """Scanner that always returns clean — used in trusted upload pipelines."""

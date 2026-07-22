@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
@@ -23,7 +24,7 @@ class OrganizationSettingsResponse(BaseModel):
     notifications_enabled: bool
     max_upload_mb: int
     retention_days: int
-    extra: dict = Field(default_factory=dict)
+    extra: dict[str, Any] = Field(default_factory=dict)
 
 
 class OrganizationSettingsUpdate(BaseModel):
@@ -32,7 +33,7 @@ class OrganizationSettingsUpdate(BaseModel):
     notifications_enabled: bool | None = None
     max_upload_mb: int | None = Field(default=None, ge=1, le=10240)
     retention_days: int | None = Field(default=None, ge=1, le=3650)
-    extra: dict | None = None
+    extra: dict[str, Any] | None = None
 
 
 @dataclass
@@ -63,9 +64,7 @@ class SettingsService:
     async def get_settings(self, organization_id: uuid.UUID) -> OrganizationSettingsResponse:
         model = await self._repo.get(organization_id)
         if model is None:
-            model = await self._repo.add(
-                OrganizationSettingsModel(organization_id=organization_id)
-            )
+            model = await self._repo.add(OrganizationSettingsModel(organization_id=organization_id))
         return self._to_response(model)
 
     async def update_settings(

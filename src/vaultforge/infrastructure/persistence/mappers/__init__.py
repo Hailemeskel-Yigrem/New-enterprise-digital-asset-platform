@@ -1,9 +1,9 @@
 """Entity <-> SQLAlchemy model mappers."""
 
 from vaultforge.infrastructure.persistence.mappers.assets import (
+    document_from_model,
     document_lock_from_model,
     document_lock_to_model,
-    document_from_model,
     document_to_model,
     document_version_from_model,
     document_version_to_model,

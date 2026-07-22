@@ -5,15 +5,15 @@ from __future__ import annotations
 import json
 import uuid
 import zipfile
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, Protocol, Sequence
+from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from vaultforge.core.config import get_settings
 from vaultforge.core.exceptions import NotFoundError, ValidationError
 from vaultforge.core.logging import get_logger
 from vaultforge.domain.common import utc_now
@@ -74,7 +74,9 @@ class ImportJob:
 class ImportJobRepository(Protocol):
     async def add(self, job: ImportJob) -> ImportJob: ...
     async def update(self, job: ImportJob) -> ImportJob: ...
-    async def get_by_id(self, organization_id: uuid.UUID, job_id: uuid.UUID) -> ImportJob | None: ...
+    async def get_by_id(
+        self, organization_id: uuid.UUID, job_id: uuid.UUID
+    ) -> ImportJob | None: ...
     async def list_for_organization(
         self, organization_id: uuid.UUID, *, limit: int = 50
     ) -> Sequence[ImportJob]: ...
@@ -244,7 +246,6 @@ class ImportService:
         return job
 
     async def _get_job_any_org(self, job_id: uuid.UUID) -> ImportJob:
-        settings = get_settings()
         job = await self.jobs.get_by_id(uuid.UUID(int=0), job_id)
         if job is not None:
             return job

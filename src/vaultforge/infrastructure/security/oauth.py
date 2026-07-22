@@ -9,14 +9,18 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
-from typing import Any
+from typing import Any, cast
 from urllib.parse import urlencode
 
 import httpx
 
 from vaultforge.core.config import Settings, get_settings
 from vaultforge.core.exceptions import AuthenticationError, ValidationError
-from vaultforge.infrastructure.security import create_access_token, create_refresh_token, verify_password
+from vaultforge.infrastructure.security import (
+    create_access_token,
+    create_refresh_token,
+    verify_password,
+)
 from vaultforge.infrastructure.security.jwt import TOKEN_TYPE_REFRESH
 
 
@@ -42,9 +46,10 @@ class OAuthClient:
     scopes: frozenset[str]
 
     def validate_secret(self, provided: str | None) -> None:
-        if self.client_type == OAuthClientType.CONFIDENTIAL:
-            if not provided or not secrets.compare_digest(provided, self.client_secret or ""):
-                raise AuthenticationError("Invalid client credentials")
+        if self.client_type == OAuthClientType.CONFIDENTIAL and (
+            not provided or not secrets.compare_digest(provided, self.client_secret or "")
+        ):
+            raise AuthenticationError("Invalid client credentials")
 
 
 @dataclass(slots=True)
@@ -208,7 +213,7 @@ class PasswordGrantAuthenticator:
             raise AuthenticationError("Invalid username or password")
         if is_active_check and not user.is_active:
             raise AuthenticationError("Account is inactive")
-        return user.id
+        return cast(uuid.UUID, user.id)
 
 
 @dataclass(slots=True)
@@ -407,7 +412,7 @@ class GoogleOIDCProvider:
             response = await client.post(doc.token_endpoint, data=payload)
         if response.status_code >= 400:
             raise AuthenticationError("Google token exchange failed")
-        return response.json()
+        return cast(dict[str, Any], response.json())
 
     async def fetch_userinfo(self, access_token: str) -> dict[str, Any]:
         doc = self.discovery()
@@ -417,7 +422,7 @@ class GoogleOIDCProvider:
             response = await client.get(endpoint, headers=headers)
         if response.status_code >= 400:
             raise AuthenticationError("Failed to fetch Google userinfo")
-        return response.json()
+        return cast(dict[str, Any], response.json())
 
 
 @dataclass(slots=True)

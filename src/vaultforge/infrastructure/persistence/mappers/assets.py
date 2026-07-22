@@ -2,8 +2,15 @@
 
 from __future__ import annotations
 
+import uuid
+
 from vaultforge.domain.assets.entities import Document, DocumentLock, DocumentVersion, Folder
-from vaultforge.domain.assets.enums import DocumentStatus, FolderKind, SensitivityLabel, VersionStatus
+from vaultforge.domain.assets.enums import (
+    DocumentStatus,
+    FolderKind,
+    SensitivityLabel,
+    VersionStatus,
+)
 from vaultforge.infrastructure.persistence.models.document import (
     DocumentLockModel,
     DocumentModel,
@@ -136,16 +143,14 @@ def document_lock_from_model(model: DocumentLockModel) -> DocumentLock:
         updated_at=model.updated_at,
     )
 
+
 def documents_from_models(
     models: list[DocumentModel],
     *,
     versions_by_document: dict[uuid.UUID, DocumentVersion] | None = None,
 ) -> list[Document]:
     versions = versions_by_document or {}
-    return [
-        document_from_model(m, current_version=versions.get(m.id))
-        for m in models
-    ]
+    return [document_from_model(m, current_version=versions.get(m.id)) for m in models]
 
 
 def folders_from_models(models: list[FolderModel]) -> list[Folder]:
