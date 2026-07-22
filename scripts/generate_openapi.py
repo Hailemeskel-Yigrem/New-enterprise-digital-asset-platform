@@ -18,7 +18,9 @@ def main() -> None:
     schema = app.openapi()
     out = ROOT / "openapi" / "openapi.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(schema, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
+    out.write_text(
+        json.dumps(schema, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
+    )
     print(f"Wrote {out.relative_to(ROOT)}")
 
 

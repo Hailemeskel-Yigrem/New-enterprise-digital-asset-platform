@@ -67,9 +67,7 @@ class Comment(Entity):
         self.touch()
 
     def sync_mentions(self, user_ids: list[uuid.UUID]) -> list[Mention]:
-        self.mentions = [
-            Mention(comment_id=self.id, user_id=user_id) for user_id in user_ids
-        ]
+        self.mentions = [Mention(comment_id=self.id, user_id=user_id) for user_id in user_ids]
         self.touch()
         return self.mentions
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -12,6 +13,10 @@ from vaultforge.infrastructure.persistence.base import (
     TimestampMixin,
     UUIDPrimaryKeyMixin,
 )
+
+if TYPE_CHECKING:
+    from vaultforge.infrastructure.persistence.models.membership import MembershipModel
+    from vaultforge.infrastructure.persistence.models.team import TeamMemberModel
 
 
 class UserModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -24,12 +29,12 @@ class UserModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     is_email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    memberships: Mapped[list["MembershipModel"]] = relationship(
+    memberships: Mapped[list[MembershipModel]] = relationship(
         "MembershipModel",
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    team_memberships: Mapped[list["TeamMemberModel"]] = relationship(
+    team_memberships: Mapped[list[TeamMemberModel]] = relationship(
         "TeamMemberModel",
         back_populates="user",
         cascade="all, delete-orphan",

@@ -53,9 +53,7 @@ class ShareGrant(Entity):
     def is_active(self, *, at: datetime | None = None) -> bool:
         if self.status != ShareStatus.ACTIVE:
             return False
-        if self.expires_at is not None and (at or utc_now()) >= self.expires_at:
-            return False
-        return True
+        return not (self.expires_at is not None and (at or utc_now()) >= self.expires_at)
 
     def allows(self, required: SharePermission) -> bool:
         return self.is_active() and permission_includes(self.permission, required)
@@ -100,9 +98,7 @@ class ShareLink(Entity):
             return False
         if self.expires_at is not None and (at or utc_now()) >= self.expires_at:
             return False
-        if self.max_uses is not None and self.use_count >= self.max_uses:
-            return False
-        return True
+        return not (self.max_uses is not None and self.use_count >= self.max_uses)
 
     def record_use(self) -> None:
         if not self.is_usable():

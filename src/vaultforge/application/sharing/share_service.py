@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
 
 from vaultforge.application.sharing.schemas import (
     AccessControlEntryResponse,
@@ -18,7 +17,11 @@ from vaultforge.application.sharing.schemas import (
     ShareLinkCreateRequest,
     ShareLinkResponse,
 )
-from vaultforge.core.exceptions import AuthorizationError, ConflictError, NotFoundError, ValidationError
+from vaultforge.core.exceptions import (
+    AuthorizationError,
+    ConflictError,
+    NotFoundError,
+)
 from vaultforge.domain.sharing.entities import (
     AccessControlEntry,
     ShareGrant,
@@ -26,7 +29,12 @@ from vaultforge.domain.sharing.entities import (
     ShareLink,
     merge_acl_entries,
 )
-from vaultforge.domain.sharing.enums import SharePermission, ShareResourceType, ShareStatus, ShareTargetType
+from vaultforge.domain.sharing.enums import (
+    SharePermission,
+    ShareResourceType,
+    ShareStatus,
+    ShareTargetType,
+)
 from vaultforge.domain.sharing.repositories import (
     AccessControlRepository,
     ShareGrantRepository,
@@ -57,7 +65,8 @@ class ShareService:
             if (
                 grant.target_type == payload.target_type
                 and grant.target_id == payload.target_id
-                and grant.target_email == (str(payload.target_email) if payload.target_email else None)
+                and grant.target_email
+                == (str(payload.target_email) if payload.target_email else None)
                 and grant.is_active()
             ):
                 raise ConflictError("An active share already exists for this target")
@@ -138,9 +147,10 @@ class ShareService:
             raise NotFoundError("Share link not found")
         if not link.is_usable():
             raise AuthorizationError("Share link is expired or revoked")
-        if link.password_hash is not None:
-            if password is None or not verify_password(password, link.password_hash):
-                raise AuthorizationError("Invalid share link password")
+        if link.password_hash is not None and (
+            password is None or not verify_password(password, link.password_hash)
+        ):
+            raise AuthorizationError("Invalid share link password")
         if not link.permission or not _permission_includes(link.permission, required):
             raise AuthorizationError("Insufficient share link permission")
         link.record_use()

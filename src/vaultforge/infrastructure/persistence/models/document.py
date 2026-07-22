@@ -16,7 +16,9 @@ from vaultforge.infrastructure.persistence.base import Base, TimestampMixin, UUI
 class DocumentModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "documents"
 
-    organization_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
     folder_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("folders.id", ondelete="RESTRICT"),
@@ -24,7 +26,9 @@ class DocumentModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(512), nullable=False)
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default=DocumentStatus.DRAFT.value)
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default=DocumentStatus.DRAFT.value
+    )
     sensitivity: Mapped[str] = mapped_column(
         String(32), nullable=False, default=SensitivityLabel.INTERNAL.value
     )
@@ -42,7 +46,7 @@ class DocumentModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    versions: Mapped[list["DocumentVersionModel"]] = relationship(
+    versions: Mapped[list[DocumentVersionModel]] = relationship(
         "DocumentVersionModel",
         back_populates="document",
         foreign_keys="DocumentVersionModel.document_id",
@@ -67,7 +71,9 @@ class DocumentVersionModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     checksum_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     content_type: Mapped[str] = mapped_column(String(255), nullable=False)
     size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default=VersionStatus.CURRENT.value)
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default=VersionStatus.CURRENT.value
+    )
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     comment: Mapped[str] = mapped_column(Text, nullable=False, default="")
 

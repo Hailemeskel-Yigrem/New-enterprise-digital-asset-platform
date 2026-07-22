@@ -279,7 +279,9 @@ class RetentionService:
                 schedule.unblock_legal_hold()
                 await self.schedules.update(schedule)
 
-    async def _get_policy(self, organization_id: uuid.UUID, policy_id: uuid.UUID) -> RetentionPolicy:
+    async def _get_policy(
+        self, organization_id: uuid.UUID, policy_id: uuid.UUID
+    ) -> RetentionPolicy:
         policy = await self.policies.get_by_id(organization_id, policy_id)
         if policy is None:
             raise NotFoundError("Retention policy not found")

@@ -31,4 +31,4 @@ class OrganizationSettingsModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     notifications_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     max_upload_mb: Mapped[int] = mapped_column(Integer, nullable=False, default=100)
     retention_days: Mapped[int] = mapped_column(Integer, nullable=False, default=365)
-    extra: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    extra: Mapped[dict[str, object]] = mapped_column(JSONB, nullable=False, default=dict)

@@ -53,4 +53,4 @@ async def update_organization_settings(
         return await service.update_settings(org_id, payload)
     except VaultForgeError as exc:
         _raise_http(exc)
-        raise AssertionError("unreachable")
+        raise AssertionError("unreachable") from exc

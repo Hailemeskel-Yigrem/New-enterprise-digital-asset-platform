@@ -12,7 +12,6 @@ from vaultforge.domain.assets.enums import DocumentStatus, SensitivityLabel, Ver
 from vaultforge.domain.common import utc_now
 from vaultforge.domain.sharing.enums import SharePermission
 
-
 MAX_DOWNLOAD_BYTES: dict[SensitivityLabel, int] = {
     SensitivityLabel.PUBLIC: 512 * 1024 * 1024,
     SensitivityLabel.INTERNAL: 256 * 1024 * 1024,
@@ -85,19 +84,18 @@ class DocumentDownloadPolicy:
         if context.granted_permission is None and not context.is_org_member:
             return DownloadDecision(False, "No download permission")
 
-        if context.granted_permission is not None:
-            if context.granted_permission not in {
-                SharePermission.DOWNLOAD,
-                SharePermission.EDIT,
-                SharePermission.ADMIN,
-            } and not _admin_share(context.granted_permission):
-                return DownloadDecision(False, "Share grant does not include download")
+        if (
+            context.granted_permission is not None
+            and context.granted_permission
+            not in {SharePermission.DOWNLOAD, SharePermission.EDIT, SharePermission.ADMIN}
+            and not _admin_share(context.granted_permission)
+        ):
+            return DownloadDecision(False, "Share grant does not include download")
 
-        watermark = (
-            context.watermark_required
-            or document.sensitivity
-            in {SensitivityLabel.CONFIDENTIAL, SensitivityLabel.RESTRICTED}
-        )
+        watermark = context.watermark_required or document.sensitivity in {
+            SensitivityLabel.CONFIDENTIAL,
+            SensitivityLabel.RESTRICTED,
+        }
 
         audit = "elevated" if document.sensitivity == SensitivityLabel.RESTRICTED else "standard"
         if context.legal_hold_active:
@@ -130,9 +128,7 @@ class DocumentVersioningPolicy:
         if document.status == DocumentStatus.ARCHIVED:
             return VersioningDecision(False, 0, False, "Archived documents are immutable")
 
-        active_versions = [
-            v for v in existing_versions if v.status != VersionStatus.PENDING
-        ]
+        active_versions = [v for v in existing_versions if v.status != VersionStatus.PENDING]
         if len(active_versions) >= self._context.max_versions:
             return VersioningDecision(
                 False,
@@ -197,6 +193,7 @@ def enforce_download_or_raise(
 
 def _admin_share(permission: SharePermission) -> bool:
     return permission == SharePermission.ADMIN
+
 
 @dataclass(frozen=True, slots=True)
 class UploadPolicyContext:

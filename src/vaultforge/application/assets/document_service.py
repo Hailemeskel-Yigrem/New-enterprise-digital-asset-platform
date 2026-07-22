@@ -14,8 +14,8 @@ from vaultforge.application.assets.schemas import (
     DocumentVersionCreateRequest,
     DocumentVersionResponse,
 )
-from vaultforge.core.pagination import Page, PageParams
 from vaultforge.core.exceptions import ConflictError, NotFoundError, ValidationError
+from vaultforge.core.pagination import Page, PageParams
 from vaultforge.domain.assets.entities import Document, DocumentVersion
 from vaultforge.domain.assets.enums import VersionStatus
 from vaultforge.domain.assets.repositories import (
@@ -292,7 +292,9 @@ class DocumentService:
             data=data,
         )
 
-    async def _require_document(self, organization_id: uuid.UUID, document_id: uuid.UUID) -> Document:
+    async def _require_document(
+        self, organization_id: uuid.UUID, document_id: uuid.UUID
+    ) -> Document:
         document = await self._documents.get_by_id(organization_id, document_id)
         if document is None:
             raise NotFoundError("Document not found")

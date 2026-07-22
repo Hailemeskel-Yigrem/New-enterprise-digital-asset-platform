@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +12,10 @@ from sqlalchemy.orm import selectinload
 from vaultforge.domain.signatures.entities import SignatureRequest, Signer
 from vaultforge.domain.signatures.enums import SignatureRequestStatus, SignerStatus
 from vaultforge.domain.signatures.repositories import SignatureRequestRepository, SignerRepository
-from vaultforge.infrastructure.persistence.models.signature import SignerModel, SignatureRequestModel
+from vaultforge.infrastructure.persistence.models.signature import (
+    SignatureRequestModel,
+    SignerModel,
+)
 
 
 def _request_to_entity(model: SignatureRequestModel) -> SignatureRequest:
@@ -143,7 +147,7 @@ class SqlAlchemySignerRepository(SignerRepository):
         result = await self._session.execute(stmt)
         return [_signer_to_entity(model) for model in result.scalars().all()]
 
-    async def add_many(self, signers: list[Signer]) -> list[Signer]:
+    async def add_many(self, signers: Sequence[Signer]) -> list[Signer]:
         models = [
             SignerModel(
                 id=signer.id,

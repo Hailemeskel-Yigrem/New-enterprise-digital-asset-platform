@@ -63,7 +63,9 @@ async def get_retention_service(
     )
 
 
-@router.post("/policies", response_model=RetentionPolicyResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/policies", response_model=RetentionPolicyResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_policy(
     organization_id: uuid.UUID,
     payload: RetentionPolicyCreateRequest,
@@ -155,7 +157,9 @@ async def create_legal_hold(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> LegalHoldResponse:
     try:
-        return await service.create_legal_hold(organization_id, _resolve_user_id(x_user_id), payload)
+        return await service.create_legal_hold(
+            organization_id, _resolve_user_id(x_user_id), payload
+        )
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 
@@ -189,7 +193,9 @@ async def release_legal_hold(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> LegalHoldResponse:
     try:
-        return await service.release_legal_hold(organization_id, hold_id, _resolve_user_id(x_user_id))
+        return await service.release_legal_hold(
+            organization_id, hold_id, _resolve_user_id(x_user_id)
+        )
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 

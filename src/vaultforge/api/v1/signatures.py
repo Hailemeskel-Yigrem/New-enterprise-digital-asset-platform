@@ -67,9 +67,7 @@ async def create_signature_request(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> SignatureRequestResponse:
     try:
-        return await service.create_request(
-            organization_id, _resolve_user_id(x_user_id), payload
-        )
+        return await service.create_request(organization_id, _resolve_user_id(x_user_id), payload)
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 
@@ -106,9 +104,7 @@ async def sign_document(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> SignDocumentResponse:
     try:
-        return await service.sign(
-            organization_id, request_id, _resolve_user_id(x_user_id)
-        )
+        return await service.sign(organization_id, request_id, _resolve_user_id(x_user_id))
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 

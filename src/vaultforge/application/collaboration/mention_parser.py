@@ -8,9 +8,7 @@ from dataclasses import dataclass
 
 from vaultforge.domain.collaboration.entities import extract_mention_user_ids
 
-MENTION_DISPLAY_PATTERN = re.compile(
-    r"@\[([^\]]+)\]\(([0-9a-fA-F-]{36})\)"
-)
+MENTION_DISPLAY_PATTERN = re.compile(r"@\[([^\]]+)\]\(([0-9a-fA-F-]{36})\)")
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,6 +77,7 @@ def replace_mention_tokens(body: str, mapping: dict[uuid.UUID, str]) -> str:
         return format_mention(name, uid)
 
     return MENTION_DISPLAY_PATTERN.sub(_replacer, body)
+
 
 def validate_mentions(body: str, known_user_ids: set[uuid.UUID]) -> list[uuid.UUID]:
     """Return mention IDs that are not in the known set."""

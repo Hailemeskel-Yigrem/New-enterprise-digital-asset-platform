@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +17,12 @@ from vaultforge.domain.sharing.entities import (
     ShareInvitation,
     ShareLink,
 )
-from vaultforge.domain.sharing.enums import SharePermission, ShareResourceType, ShareStatus, ShareTargetType
+from vaultforge.domain.sharing.enums import (
+    SharePermission,
+    ShareResourceType,
+    ShareStatus,
+    ShareTargetType,
+)
 from vaultforge.domain.sharing.repositories import ShareQueryCriteria
 from vaultforge.infrastructure.persistence.models.share import (
     AccessControlEntryModel,
@@ -247,9 +252,7 @@ class SqlAlchemyShareGrantRepository:
         await self._session.flush()
         return _grant_to_entity(model)
 
-    async def get_by_id(
-        self, organization_id: uuid.UUID, grant_id: uuid.UUID
-    ) -> ShareGrant | None:
+    async def get_by_id(self, organization_id: uuid.UUID, grant_id: uuid.UUID) -> ShareGrant | None:
         stmt = select(ShareGrantModel).where(
             ShareGrantModel.id == grant_id,
             ShareGrantModel.organization_id == organization_id,
@@ -341,9 +344,7 @@ class SqlAlchemyShareLinkRepository:
         model = result.scalar_one_or_none()
         return _link_to_entity(model) if model else None
 
-    async def get_by_id(
-        self, organization_id: uuid.UUID, link_id: uuid.UUID
-    ) -> ShareLink | None:
+    async def get_by_id(self, organization_id: uuid.UUID, link_id: uuid.UUID) -> ShareLink | None:
         stmt = select(ShareLinkModel).where(
             ShareLinkModel.id == link_id,
             ShareLinkModel.organization_id == organization_id,
@@ -537,9 +538,7 @@ class SqlAlchemyRetentionPolicyRepository:
         model = result.scalar_one_or_none()
         return _policy_to_entity(model) if model else None
 
-    async def list_for_organization(
-        self, organization_id: uuid.UUID
-    ) -> Sequence[RetentionPolicy]:
+    async def list_for_organization(self, organization_id: uuid.UUID) -> Sequence[RetentionPolicy]:
         stmt = select(RetentionPolicyModel).where(
             RetentionPolicyModel.organization_id == organization_id
         )
@@ -661,9 +660,7 @@ class SqlAlchemyLegalHoldRepository:
         await self._session.flush()
         return _hold_to_entity(model)
 
-    async def get_by_id(
-        self, organization_id: uuid.UUID, hold_id: uuid.UUID
-    ) -> LegalHold | None:
+    async def get_by_id(self, organization_id: uuid.UUID, hold_id: uuid.UUID) -> LegalHold | None:
         stmt = select(LegalHoldModel).where(
             LegalHoldModel.id == hold_id,
             LegalHoldModel.organization_id == organization_id,
@@ -687,8 +684,4 @@ class SqlAlchemyLegalHoldRepository:
         folder_id: uuid.UUID | None = None,
     ) -> Sequence[LegalHold]:
         holds = await self.list_active(organization_id)
-        return [
-            hold
-            for hold in holds
-            if hold.covers_resource(resource_id, folder_id)
-        ]
+        return [hold for hold in holds if hold.covers_resource(resource_id, folder_id)]

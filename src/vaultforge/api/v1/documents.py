@@ -121,7 +121,9 @@ async def get_document(
         raise _http_error(exc) from exc
 
 
-@router.post("/{document_id}/versions", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{document_id}/versions", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_version(
     organization_id: uuid.UUID,
     document_id: uuid.UUID,
@@ -153,9 +155,7 @@ async def checkout_document(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> CheckoutResponse:
     try:
-        return await service.checkout(
-            organization_id, document_id, _resolve_user_id(x_user_id)
-        )
+        return await service.checkout(organization_id, document_id, _resolve_user_id(x_user_id))
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 
@@ -168,9 +168,7 @@ async def checkin_document(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> DocumentResponse:
     try:
-        return await service.checkin(
-            organization_id, document_id, _resolve_user_id(x_user_id)
-        )
+        return await service.checkin(organization_id, document_id, _resolve_user_id(x_user_id))
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 

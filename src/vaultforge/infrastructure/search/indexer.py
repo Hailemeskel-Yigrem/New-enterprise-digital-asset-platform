@@ -5,10 +5,11 @@ from __future__ import annotations
 import hashlib
 import re
 import uuid
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
-from typing import Any, Iterable, Sequence
+from typing import Any
 
 from vaultforge.core.logging import get_logger
 
@@ -129,7 +130,9 @@ class Tokenizer:
         self.max_token_length = max_token_length
         self.stop_words = stop_words or _DEFAULT_STOP_WORDS
 
-    def tokenize(self, text: str, field: IndexField, *, base_weight: float = 1.0) -> list[IndexToken]:
+    def tokenize(
+        self, text: str, field: IndexField, *, base_weight: float = 1.0
+    ) -> list[IndexToken]:
         normalized = TextNormalizer().normalize(text)
         if not normalized:
             return []
@@ -156,10 +159,43 @@ _FIELD_WEIGHTS: dict[IndexField, float] = {
 
 _DEFAULT_STOP_WORDS = frozenset(
     {
-        "a", "an", "and", "are", "as", "at", "be", "by", "for", "from",
-        "has", "he", "in", "is", "it", "its", "of", "on", "that", "the",
-        "to", "was", "were", "will", "with", "this", "but", "they", "have",
-        "had", "what", "when", "where", "who", "which", "why", "how",
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "be",
+        "by",
+        "for",
+        "from",
+        "has",
+        "he",
+        "in",
+        "is",
+        "it",
+        "its",
+        "of",
+        "on",
+        "that",
+        "the",
+        "to",
+        "was",
+        "were",
+        "will",
+        "with",
+        "this",
+        "but",
+        "they",
+        "have",
+        "had",
+        "what",
+        "when",
+        "where",
+        "who",
+        "which",
+        "why",
+        "how",
     }
 )
 
@@ -274,7 +310,9 @@ class DocumentIndexer:
                     indexed += 1
             except Exception as exc:
                 errors += 1
-                log.warning("index_document_failed", resource_id=str(document.resource_id), error=str(exc))
+                log.warning(
+                    "index_document_failed", resource_id=str(document.resource_id), error=str(exc)
+                )
                 results.append(
                     IndexResult(
                         document_id=document.resource_id,

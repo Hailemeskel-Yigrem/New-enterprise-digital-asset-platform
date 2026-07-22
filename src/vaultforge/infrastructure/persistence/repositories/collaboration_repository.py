@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -80,9 +81,7 @@ class SqlAlchemyCommentRepository(CommentRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def get_by_id(
-        self, organization_id: uuid.UUID, comment_id: uuid.UUID
-    ) -> Comment | None:
+    async def get_by_id(self, organization_id: uuid.UUID, comment_id: uuid.UUID) -> Comment | None:
         stmt = (
             select(CommentModel)
             .where(
@@ -151,7 +150,7 @@ class SqlAlchemyMentionRepository(MentionRepository):
         return [_mention_to_entity(model) for model in result.scalars().all()]
 
     async def replace_for_comment(
-        self, comment_id: uuid.UUID, mentions: list[Mention]
+        self, comment_id: uuid.UUID, mentions: Sequence[Mention]
     ) -> list[Mention]:
         await self._session.execute(
             delete(MentionModel).where(MentionModel.comment_id == comment_id)
@@ -179,7 +178,7 @@ class SqlAlchemyNotificationRepository(NotificationRepository):
         saved = list(await self.add_many([notification]))
         return saved[0]
 
-    async def add_many(self, notifications: list[Notification]) -> list[Notification]:
+    async def add_many(self, notifications: Sequence[Notification]) -> list[Notification]:
         models = [
             NotificationModel(
                 id=notification.id,

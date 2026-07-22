@@ -105,9 +105,7 @@ class TeamService:
             return
         org_members = await self.memberships.list_for_org(org_id)
         active_user_ids = {
-            item.user_id
-            for item in org_members
-            if item.status == MembershipStatus.ACTIVE
+            item.user_id for item in org_members if item.status == MembershipStatus.ACTIVE
         }
         invalid = [user_id for user_id in member_ids if user_id not in active_user_ids]
         if invalid:

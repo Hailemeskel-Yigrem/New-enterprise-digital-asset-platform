@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 
+from vaultforge.application.collaboration.notification_service import NotificationService
 from vaultforge.application.collaboration.schemas import (
     CommentCreateRequest,
     CommentResponse,
@@ -11,9 +12,8 @@ from vaultforge.application.collaboration.schemas import (
     MentionResponse,
 )
 from vaultforge.core.exceptions import NotFoundError
-from vaultforge.domain.collaboration.entities import Comment, Mention, extract_mention_user_ids
+from vaultforge.domain.collaboration.entities import Comment, extract_mention_user_ids
 from vaultforge.domain.collaboration.repositories import CommentRepository, MentionRepository
-from vaultforge.application.collaboration.notification_service import NotificationService
 
 
 class CommentService:
@@ -115,9 +115,7 @@ class CommentService:
             responses.append(self._to_response(comment))
         return responses
 
-    async def _require_comment(
-        self, organization_id: uuid.UUID, comment_id: uuid.UUID
-    ) -> Comment:
+    async def _require_comment(self, organization_id: uuid.UUID, comment_id: uuid.UUID) -> Comment:
         comment = await self._comments.get_by_id(organization_id, comment_id)
         if comment is None:
             raise NotFoundError("Comment not found")

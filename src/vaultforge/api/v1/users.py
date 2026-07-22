@@ -115,13 +115,16 @@ async def get_org_user(
     return UserResponse.model_validate(user)
 
 
-@router.patch("/{user_id}", response_model=UserResponse)
+@router.patch(
+    "/{user_id}",
+    response_model=UserResponse,
+    dependencies=[Depends(require_permission(Permission.USER_MANAGE))],
+)
 async def update_org_user_profile(
     org_id: uuid.UUID,
     user_id: uuid.UUID,
     payload: UserProfileUpdate,
     db: DbSession,
-    _membership=Depends(require_permission(Permission.USER_MANAGE)),
 ) -> UserResponse:
     target_membership = await SqlAlchemyMembershipRepository(db).get(org_id, user_id)
     if target_membership is None or target_membership.status != MembershipStatus.ACTIVE:

@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import uuid
-
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vaultforge.domain.audit.entities import ActivityItem, AuditEvent
@@ -48,7 +46,9 @@ def _activity_to_entity(model: ActivityItemModel) -> ActivityItem:
     )
 
 
-def _apply_audit_filters(stmt: Select[tuple[AuditEventModel]], criteria: AuditQueryCriteria) -> Select:
+def _apply_audit_filters(
+    stmt: Select[tuple[AuditEventModel]], criteria: AuditQueryCriteria
+) -> Select[tuple[AuditEventModel]]:
     stmt = stmt.where(AuditEventModel.organization_id == criteria.organization_id)
     if criteria.resource_type is not None:
         stmt = stmt.where(AuditEventModel.resource_type == criteria.resource_type)
@@ -62,12 +62,16 @@ def _apply_audit_filters(stmt: Select[tuple[AuditEventModel]], criteria: AuditQu
         stmt = stmt.where(AuditEventModel.created_at >= criteria.since)
     if criteria.until is not None:
         stmt = stmt.where(AuditEventModel.created_at <= criteria.until)
-    return stmt.order_by(AuditEventModel.created_at.desc()).limit(criteria.limit).offset(criteria.offset)
+    return (
+        stmt.order_by(AuditEventModel.created_at.desc())
+        .limit(criteria.limit)
+        .offset(criteria.offset)
+    )
 
 
 def _apply_activity_filters(
     stmt: Select[tuple[ActivityItemModel]], criteria: ActivityQueryCriteria
-) -> Select:
+) -> Select[tuple[ActivityItemModel]]:
     stmt = stmt.where(ActivityItemModel.organization_id == criteria.organization_id)
     if criteria.user_id is not None:
         stmt = stmt.where(ActivityItemModel.user_id == criteria.user_id)
@@ -79,7 +83,11 @@ def _apply_activity_filters(
         stmt = stmt.where(ActivityItemModel.created_at >= criteria.since)
     if criteria.until is not None:
         stmt = stmt.where(ActivityItemModel.created_at <= criteria.until)
-    return stmt.order_by(ActivityItemModel.created_at.desc()).limit(criteria.limit).offset(criteria.offset)
+    return (
+        stmt.order_by(ActivityItemModel.created_at.desc())
+        .limit(criteria.limit)
+        .offset(criteria.offset)
+    )
 
 
 class SqlAlchemyAuditEventRepository(AuditEventRepository):

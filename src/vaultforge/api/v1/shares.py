@@ -88,7 +88,9 @@ async def list_grants(
     service: ShareService = Depends(get_share_service),
 ) -> list[ShareGrantResponse]:
     try:
-        return await service.list_grants(organization_id, ShareResourceType(resource_type), resource_id)
+        return await service.list_grants(
+            organization_id, ShareResourceType(resource_type), resource_id
+        )
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 
@@ -131,7 +133,9 @@ async def revoke_link(
         raise _http_error(exc) from exc
 
 
-@router.post("/invitations", response_model=ShareInvitationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/invitations", response_model=ShareInvitationResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_invitation(
     organization_id: uuid.UUID,
     payload: ShareInvitationCreateRequest,
@@ -139,7 +143,9 @@ async def create_invitation(
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> ShareInvitationResponse:
     try:
-        return await service.create_invitation(organization_id, _resolve_user_id(x_user_id), payload)
+        return await service.create_invitation(
+            organization_id, _resolve_user_id(x_user_id), payload
+        )
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 
@@ -181,7 +187,9 @@ async def list_acl(
     service: ShareService = Depends(get_share_service),
 ) -> list[AccessControlEntryResponse]:
     try:
-        return await service.list_acl(organization_id, ShareResourceType(resource_type), resource_id)
+        return await service.list_acl(
+            organization_id, ShareResourceType(resource_type), resource_id
+        )
     except VaultForgeError as exc:
         raise _http_error(exc) from exc
 

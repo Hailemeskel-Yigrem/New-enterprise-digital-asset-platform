@@ -38,5 +38,7 @@ class RedisClient:
 @lru_cache
 def get_redis_client() -> RedisClient:
     settings = get_settings()
-    redis = aioredis.from_url(settings.redis_url, decode_responses=False)
+    redis = aioredis.from_url(  # type: ignore[no-untyped-call]
+        settings.redis_url, decode_responses=False
+    )
     return RedisClient(redis)

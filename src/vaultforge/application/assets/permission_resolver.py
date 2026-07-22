@@ -18,7 +18,6 @@ from vaultforge.domain.sharing.enums import (
     permission_includes,
 )
 
-
 RBAC_TO_SHARE: dict[Permission, SharePermission] = {
     Permission.DOCUMENT_READ: SharePermission.VIEW,
     Permission.DOCUMENT_UPDATE: SharePermission.EDIT,
@@ -96,13 +95,9 @@ class PermissionResolver:
         if rbac is not None:
             return rbac
 
-        share_perm = self._best_share_permission(
-            principal, resource_type, resource_id, reference
-        )
+        share_perm = self._best_share_permission(principal, resource_type, resource_id, reference)
         if share_perm is not None and permission_includes(share_perm, required):
-            return EffectivePermissionResult(
-                allowed=True, source="share", granted=share_perm
-            )
+            return EffectivePermissionResult(allowed=True, source="share", granted=share_perm)
 
         return EffectivePermissionResult(
             allowed=False,
@@ -120,9 +115,7 @@ class PermissionResolver:
     ) -> frozenset[SharePermission]:
         granted: set[SharePermission] = set()
         for perm in SharePermission:
-            result = self.resolve(
-                principal, resource_type, resource_id, perm, at=at
-            )
+            result = self.resolve(principal, resource_type, resource_id, perm, at=at)
             if result.allowed:
                 granted.add(perm)
         return frozenset(granted)
@@ -140,9 +133,7 @@ class PermissionResolver:
             if share_level != required:
                 continue
             if membership.has_permission(permission):
-                return EffectivePermissionResult(
-                    allowed=True, source="rbac", granted=share_level
-                )
+                return EffectivePermissionResult(allowed=True, source="rbac", granted=share_level)
         return None
 
     def _matching_acl(
@@ -159,9 +150,7 @@ class PermissionResolver:
                 matches.append(entry)
         return matches
 
-    def _principal_matches(
-        self, entry: AccessControlEntry, principal: PrincipalContext
-    ) -> bool:
+    def _principal_matches(self, entry: AccessControlEntry, principal: PrincipalContext) -> bool:
         if entry.principal_type == ShareTargetType.USER:
             return entry.principal_id == principal.user_id
         if entry.principal_type == ShareTargetType.TEAM:
@@ -197,12 +186,8 @@ class PermissionResolver:
         if grant.target_type == ShareTargetType.ORGANIZATION:
             return grant.organization_id == principal.organization_id
         if grant.target_type == ShareTargetType.EXTERNAL_EMAIL:
-            return (
-                principal.email is not None
-                and grant.target_email == principal.email.lower()
-            )
+            return principal.email is not None and grant.target_email == principal.email.lower()
         return False
-
 
     def explain_access(
         self,
@@ -212,7 +197,7 @@ class PermissionResolver:
         required: SharePermission,
         *,
         at: datetime | None = None,
-    ) -> "AccessExplanation":
+    ) -> AccessExplanation:
         """Return a step-by-step explanation suitable for audit UI."""
         steps: list[str] = []
         reference = at or utc_now()
@@ -236,9 +221,7 @@ class PermissionResolver:
             steps.append("ACL allows access")
             return AccessExplanation(True, steps, required)
 
-        share_perm = self._best_share_permission(
-            principal, resource_type, resource_id, reference
-        )
+        share_perm = self._best_share_permission(principal, resource_type, resource_id, reference)
         if share_perm is not None:
             steps.append(f"Active share grant provides {share_perm.value}")
             if permission_includes(share_perm, required):
@@ -259,9 +242,7 @@ class PermissionResolver:
     ) -> dict[uuid.UUID, EffectivePermissionResult]:
         """Evaluate the same permission against multiple resources."""
         return {
-            resource_id: self.resolve(
-                principal, resource_type, resource_id, required, at=at
-            )
+            resource_id: self.resolve(principal, resource_type, resource_id, required, at=at)
             for resource_type, resource_id in resources
         }
 

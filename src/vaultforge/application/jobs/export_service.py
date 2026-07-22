@@ -5,12 +5,13 @@ from __future__ import annotations
 import json
 import uuid
 import zipfile
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Protocol, Sequence
+from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -81,7 +82,9 @@ class ExportJob:
 class ExportJobRepository(Protocol):
     async def add(self, job: ExportJob) -> ExportJob: ...
     async def update(self, job: ExportJob) -> ExportJob: ...
-    async def get_by_id(self, organization_id: uuid.UUID, job_id: uuid.UUID) -> ExportJob | None: ...
+    async def get_by_id(
+        self, organization_id: uuid.UUID, job_id: uuid.UUID
+    ) -> ExportJob | None: ...
     async def list_for_organization(
         self, organization_id: uuid.UUID, *, limit: int = 50
     ) -> Sequence[ExportJob]: ...
@@ -110,7 +113,9 @@ class ExportService:
         payload: ExportJobCreateRequest,
     ) -> ExportJobResponse:
         active = await self.jobs.list_for_organization(organization_id, limit=20)
-        running = [j for j in active if j.status in {ExportJobStatus.PENDING, ExportJobStatus.RUNNING}]
+        running = [
+            j for j in active if j.status in {ExportJobStatus.PENDING, ExportJobStatus.RUNNING}
+        ]
         if len(running) >= 5:
             raise ConflictError("Too many active export jobs for this organization")
 
@@ -226,7 +231,6 @@ class ExportService:
         return job
 
     async def _get_job_by_id(self, job_id: uuid.UUID) -> ExportJob:
-        settings = get_settings()
         org_placeholder = uuid.UUID(int=0)
         job = await self.jobs.get_by_id(org_placeholder, job_id)
         if job is not None:

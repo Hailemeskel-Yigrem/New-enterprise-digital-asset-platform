@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import uuid
 from dataclasses import dataclass
+from typing import cast
 
 from pydantic import BaseModel
 
@@ -85,7 +86,7 @@ class PreviewService:
         from PIL import Image
 
         with Image.open(io.BytesIO(content)) as image:
-            return image.size
+            return cast(tuple[int, int], image.size)
 
     @staticmethod
     def _render_thumbnail(content: bytes, max_size: tuple[int, int]) -> bytes:

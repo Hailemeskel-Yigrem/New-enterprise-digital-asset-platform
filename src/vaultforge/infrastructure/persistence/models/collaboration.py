@@ -15,7 +15,9 @@ from vaultforge.infrastructure.persistence.base import Base, TimestampMixin, UUI
 class CommentModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "comments"
 
-    organization_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
     resource_type: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     resource_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     author_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
@@ -24,7 +26,7 @@ class CommentModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    mentions: Mapped[list["MentionModel"]] = relationship(
+    mentions: Mapped[list[MentionModel]] = relationship(
         "MentionModel",
         back_populates="comment",
         cascade="all, delete-orphan",
@@ -33,9 +35,7 @@ class CommentModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
 class MentionModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "mentions"
-    __table_args__ = (
-        UniqueConstraint("comment_id", "user_id", name="uq_mentions_comment_user"),
-    )
+    __table_args__ = (UniqueConstraint("comment_id", "user_id", name="uq_mentions_comment_user"),)
 
     comment_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -51,7 +51,9 @@ class MentionModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 class NotificationModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "notifications"
 
-    organization_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)

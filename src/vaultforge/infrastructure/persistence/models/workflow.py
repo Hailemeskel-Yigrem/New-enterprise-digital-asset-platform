@@ -15,13 +15,15 @@ from vaultforge.infrastructure.persistence.base import Base, TimestampMixin, UUI
 class ApprovalWorkflowModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "approval_workflows"
 
-    organization_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="active")
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
 
-    steps: Mapped[list["WorkflowStepModel"]] = relationship(
+    steps: Mapped[list[WorkflowStepModel]] = relationship(
         "WorkflowStepModel",
         back_populates="workflow",
         cascade="all, delete-orphan",
@@ -56,7 +58,9 @@ class WorkflowStepModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 class WorkflowInstanceModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "workflow_instances"
 
-    organization_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
     workflow_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("approval_workflows.id", ondelete="RESTRICT"),
@@ -69,7 +73,7 @@ class WorkflowInstanceModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     started_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    step_instances: Mapped[list["StepInstanceModel"]] = relationship(
+    step_instances: Mapped[list[StepInstanceModel]] = relationship(
         "StepInstanceModel",
         back_populates="instance",
         cascade="all, delete-orphan",

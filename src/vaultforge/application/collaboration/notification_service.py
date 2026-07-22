@@ -103,4 +103,5 @@ class NotificationService:
             updated_at=notification.updated_at,
         )
 
+
 # mark_all_read should be idempotent under concurrent readers
