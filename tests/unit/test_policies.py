@@ -10,10 +10,13 @@ from vaultforge.domain.assets.entities import Document, DocumentVersion
 from vaultforge.domain.assets.enums import DocumentStatus, SensitivityLabel, VersionStatus
 from vaultforge.domain.assets.policies import (
     DocumentDownloadPolicy,
+    DocumentUploadPolicy,
     DocumentVersioningPolicy,
     DownloadPolicyContext,
+    UploadPolicyContext,
     VersioningPolicyContext,
     enforce_download_or_raise,
+    evaluate_upload_or_raise,
 )
 from vaultforge.domain.common import utc_now
 from vaultforge.domain.sharing.enums import SharePermission
@@ -133,12 +136,6 @@ def test_versions_eligible_for_purge_respects_retention() -> None:
     assert old in eligible
     assert current not in eligible
 
-from vaultforge.domain.assets.policies import (
-    DocumentUploadPolicy,
-    UploadPolicyContext,
-    evaluate_upload_or_raise,
-)
-
 
 def test_upload_policy_blocks_executable() -> None:
     doc = _document()
@@ -165,6 +162,7 @@ def test_upload_policy_allows_pdf_for_member() -> None:
     )
     assert decision.allowed is True
     assert decision.scan_required is True
+
 
 def test_upload_oversized_rejected() -> None:
     doc = _document()

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 
 import pytest
@@ -18,7 +18,7 @@ from vaultforge.infrastructure.security import hash_password
 
 
 def _user_response(**overrides: object) -> UserResponse:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     data = {
         "id": uuid.uuid4(),
         "email": "flow@example.com",

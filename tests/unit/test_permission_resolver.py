@@ -10,10 +10,9 @@ from vaultforge.application.assets.permission_resolver import (
     build_default_deny_entry,
 )
 from vaultforge.domain.identity.entities import Membership
-from vaultforge.domain.identity.enums import OrgRole, Permission
-from vaultforge.domain.sharing.entities import AccessControlEntry, ShareGrant
+from vaultforge.domain.identity.enums import OrgRole
+from vaultforge.domain.sharing.entities import ShareGrant
 from vaultforge.domain.sharing.enums import (
-    AclEffect,
     SharePermission,
     ShareResourceType,
     ShareStatus,
@@ -155,6 +154,7 @@ def test_team_share_grant_matches_team_membership() -> None:
         SharePermission.DOWNLOAD,
     )
     assert result.allowed is True
+
 
 def test_explain_access_denied_without_membership() -> None:
     principal = PrincipalContext(user_id=uuid.uuid4(), organization_id=uuid.uuid4())

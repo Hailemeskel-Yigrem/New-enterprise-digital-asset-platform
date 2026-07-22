@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -19,7 +19,7 @@ from vaultforge.domain.signatures.enums import SignatureRequestStatus, SignerSta
 def test_compute_signature_hash_is_deterministic() -> None:
     checksum = "abc123" * 10 + "abcd"
     signer_id = uuid.UUID("11111111-1111-1111-1111-111111111111")
-    signed_at = datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+    signed_at = datetime(2026, 1, 15, 12, 0, 0, tzinfo=UTC)
 
     first = compute_signature_hash(checksum, signer_id, signed_at)
     second = compute_signature_hash(checksum, signer_id, signed_at)
@@ -29,7 +29,7 @@ def test_compute_signature_hash_is_deterministic() -> None:
 
 def test_compute_signature_hash_changes_with_checksum() -> None:
     signer_id = uuid.uuid4()
-    signed_at = datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+    signed_at = datetime(2026, 1, 15, 12, 0, 0, tzinfo=UTC)
     first = compute_signature_hash("checksum-a", signer_id, signed_at)
     second = compute_signature_hash("checksum-b", signer_id, signed_at)
     assert first != second

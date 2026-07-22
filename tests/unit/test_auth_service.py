@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 
 import pytest
@@ -16,7 +16,7 @@ from vaultforge.infrastructure.security import create_refresh_token, hash_passwo
 
 
 def _user(**overrides: object) -> User:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     base = User(
         id=uuid.uuid4(),
         email="alice@example.com",
@@ -56,9 +56,7 @@ async def test_register_rejects_duplicate_email() -> None:
 
     with pytest.raises(ConflictError, match="already registered"):
         await service.register(
-            RegisterRequest(
-                email="alice@example.com", password="SecurePass123!", full_name="Alice"
-            )
+            RegisterRequest(email="alice@example.com", password="SecurePass123!", full_name="Alice")
         )
 
 
@@ -70,9 +68,7 @@ async def test_login_returns_tokens_for_valid_credentials() -> None:
     repo.update = AsyncMock(return_value=user)
     service = AuthService(users=repo)
 
-    tokens = await service.login(
-        LoginRequest(email="alice@example.com", password="SecurePass123!")
-    )
+    tokens = await service.login(LoginRequest(email="alice@example.com", password="SecurePass123!"))
 
     assert tokens.access_token
     assert tokens.refresh_token

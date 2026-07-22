@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 
 import pytest
@@ -20,7 +20,7 @@ from vaultforge.domain.assets.enums import DocumentStatus, SensitivityLabel, Ver
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _folder(org_id: uuid.UUID | None = None) -> Folder:
@@ -201,26 +201,21 @@ async def test_upload_normalizes_tags_and_stores_version() -> None:
     folders = AsyncMock()
     folders.get_by_id = AsyncMock(return_value=folder)
     documents = AsyncMock()
-    saved_doc = _document(organization_id=org_id, folder_id=folder.id, created_by=user_id)
+
     async def _add_doc(doc):
         return doc
+
     documents.add = AsyncMock(side_effect=_add_doc)
+
     async def _upd_doc(doc):
         return doc
+
     documents.update = AsyncMock(side_effect=_upd_doc)
     versions = AsyncMock()
-    saved_version = DocumentVersion(
-        id=uuid.uuid4(),
-        document_id=saved_doc.id,
-        version_number=1,
-        checksum_sha256="abc",
-        size_bytes=4,
-        created_by=user_id,
-        created_at=_now(),
-        updated_at=_now(),
-    )
+
     async def _add_ver(ver):
         return ver
+
     versions.add = AsyncMock(side_effect=_add_ver)
     storage = AsyncMock()
     service = _service(folders=folders, documents=documents, versions=versions, storage=storage)

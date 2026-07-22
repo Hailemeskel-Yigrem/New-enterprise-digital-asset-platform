@@ -9,7 +9,6 @@ from vaultforge.api.middleware.rate_limit import (
     InMemoryRateLimitStore,
     RateLimiter,
     RateLimitRule,
-    RateLimitScope,
     build_default_rules,
 )
 

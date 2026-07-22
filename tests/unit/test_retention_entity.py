@@ -12,8 +12,6 @@ from vaultforge.domain.common import utc_now
 from vaultforge.domain.retention.entities import LegalHold, RetentionPolicy, RetentionSchedule
 from vaultforge.domain.retention.enums import (
     LegalHoldStatus,
-    RetentionAction,
-    RetentionPolicyStatus,
     RetentionScope,
 )
 

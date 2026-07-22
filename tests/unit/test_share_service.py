@@ -3,20 +3,30 @@
 from __future__ import annotations
 
 import uuid
-from typing import Sequence
+from collections.abc import Sequence
 
 import pytest
 
 from vaultforge.application.sharing.schemas import (
+    AccessControlEntryRequest,
     ReplaceAclRequest,
     ShareGrantCreateRequest,
     ShareLinkCreateRequest,
-    AccessControlEntryRequest,
 )
 from vaultforge.application.sharing.share_service import ShareService
 from vaultforge.core.exceptions import ConflictError, NotFoundError
-from vaultforge.domain.sharing.entities import AccessControlEntry, ShareGrant, ShareInvitation, ShareLink
-from vaultforge.domain.sharing.enums import SharePermission, ShareResourceType, ShareStatus, ShareTargetType
+from vaultforge.domain.sharing.entities import (
+    AccessControlEntry,
+    ShareGrant,
+    ShareInvitation,
+    ShareLink,
+)
+from vaultforge.domain.sharing.enums import (
+    SharePermission,
+    ShareResourceType,
+    ShareStatus,
+    ShareTargetType,
+)
 from vaultforge.domain.sharing.repositories import ShareQueryCriteria
 
 
@@ -94,7 +104,9 @@ class MemoryAcl:
     async def list_for_resource(self, organization_id, resource_type, resource_id):
         return self.entries
 
-    async def list_effective_permissions(self, organization_id, resource_type, resource_id, principal_id):
+    async def list_effective_permissions(
+        self, organization_id, resource_type, resource_id, principal_id
+    ):
         return SharePermission.VIEW
 
 

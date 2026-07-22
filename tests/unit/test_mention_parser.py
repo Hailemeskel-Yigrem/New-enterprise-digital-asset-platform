@@ -44,11 +44,9 @@ def test_replace_mention_tokens_updates_names() -> None:
     assert "New Name" in updated
     assert "Old Name" not in updated
 
+
 def test_validate_mentions_flags_unknown() -> None:
     from vaultforge.application.collaboration.mention_parser import (
-        count_mentions,
-        mentions_to_notification_targets,
-        strip_mention_tokens,
         validate_mentions,
     )
 
