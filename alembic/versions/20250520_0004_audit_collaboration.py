@@ -165,9 +165,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_notifications")),
     )
-    op.create_index(
-        op.f("ix_notifications_organization_id"), "notifications", ["organization_id"]
-    )
+    op.create_index(op.f("ix_notifications_organization_id"), "notifications", ["organization_id"])
     op.create_index(op.f("ix_notifications_user_id"), "notifications", ["user_id"])
 
 
