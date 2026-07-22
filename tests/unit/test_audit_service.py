@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Sequence
+from collections.abc import Sequence
 
 import pytest
 
@@ -46,11 +46,7 @@ class InMemoryActivityRepository(ActivityItemRepository):
         return item
 
     async def query(self, criteria: ActivityQueryCriteria) -> Sequence[ActivityItem]:
-        filtered = [
-            item
-            for item in self.items
-            if item.organization_id == criteria.organization_id
-        ]
+        filtered = [item for item in self.items if item.organization_id == criteria.organization_id]
         return filtered[criteria.offset : criteria.offset + criteria.limit]
 
 

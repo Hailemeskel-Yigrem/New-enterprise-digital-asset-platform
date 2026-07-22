@@ -8,7 +8,7 @@ import pytest
 
 from vaultforge.core.exceptions import AuthorizationError, ConflictError
 from vaultforge.domain.workflows.entities import StepInstance, WorkflowInstance
-from vaultforge.domain.workflows.enums import StepDecision, StepType, WorkflowStatus
+from vaultforge.domain.workflows.enums import StepType, WorkflowStatus
 
 
 def _build_instance(*assignees: uuid.UUID) -> WorkflowInstance:

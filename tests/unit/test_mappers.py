@@ -3,44 +3,41 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from vaultforge.domain.assets.entities import Document, DocumentLock, DocumentVersion, Folder
-from vaultforge.domain.assets.enums import DocumentStatus, FolderKind, SensitivityLabel, VersionStatus
-from vaultforge.domain.identity.entities import Membership, Organization, Team, User
+from vaultforge.domain.assets.entities import DocumentLock, DocumentVersion, Folder
+from vaultforge.domain.assets.enums import (
+    FolderKind,
+    VersionStatus,
+)
+from vaultforge.domain.identity.entities import Membership, Organization, User
 from vaultforge.domain.identity.enums import MembershipStatus, OrgRole
 from vaultforge.infrastructure.persistence.mappers.assets import (
-    document_from_model,
     document_lock_from_model,
     document_lock_to_model,
-    document_to_model,
     document_version_from_model,
     document_version_to_model,
     folder_from_model,
     folder_to_model,
+    folders_from_models,
 )
 from vaultforge.infrastructure.persistence.mappers.identity import (
     membership_from_model,
     membership_to_model,
     organization_from_model,
     organization_to_model,
-    team_from_model,
-    team_to_model,
     user_from_model,
     user_to_model,
+    users_from_models,
 )
 from vaultforge.infrastructure.persistence.models.document import (
     DocumentLockModel,
-    DocumentModel,
     DocumentVersionModel,
 )
 from vaultforge.infrastructure.persistence.models.folder import FolderModel
 from vaultforge.infrastructure.persistence.models.membership import MembershipModel
-from vaultforge.infrastructure.persistence.models.organization import OrganizationModel
-from vaultforge.infrastructure.persistence.models.team import TeamModel
-from vaultforge.infrastructure.persistence.models.user import UserModel
 
-NOW = datetime(2025, 9, 25, tzinfo=timezone.utc)
+NOW = datetime(2025, 9, 25, tzinfo=UTC)
 
 
 def test_user_round_trip() -> None:
@@ -84,7 +81,9 @@ def test_membership_round_trip() -> None:
         updated_at=NOW,
     )
     model = membership_to_model(entity)
-    restored = membership_from_model(MembershipModel(**{k: getattr(model, k) for k in model.__dict__ if not k.startswith("_")}))
+    restored = membership_from_model(
+        MembershipModel(**{k: getattr(model, k) for k in model.__dict__ if not k.startswith("_")})
+    )
     assert restored.role == OrgRole.MANAGER
 
 
@@ -99,7 +98,16 @@ def test_folder_round_trip() -> None:
         updated_at=NOW,
     )
     model = folder_to_model(entity)
-    restored = folder_from_model(FolderModel(**{c.name: getattr(model, c.name) for c in FolderModel.__table__.columns if c.name not in {"created_at", "updated_at"} } | {"created_at": NOW, "updated_at": NOW}))
+    restored = folder_from_model(
+        FolderModel(
+            **{
+                c.name: getattr(model, c.name)
+                for c in FolderModel.__table__.columns
+                if c.name not in {"created_at", "updated_at"}
+            }
+            | {"created_at": NOW, "updated_at": NOW}
+        )
+    )
     assert restored.name == "Contracts"
 
 
@@ -163,9 +171,6 @@ def test_document_lock_round_trip() -> None:
         )
     )
     assert restored.document_id == entity.document_id
-
-from vaultforge.infrastructure.persistence.mappers.identity import users_from_models
-from vaultforge.infrastructure.persistence.mappers.assets import folders_from_models
 
 
 def test_users_from_models_batch() -> None:

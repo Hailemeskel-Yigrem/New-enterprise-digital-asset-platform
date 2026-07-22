@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import timedelta
-from typing import Sequence
+from collections.abc import Sequence
 
 import pytest
 
@@ -15,9 +14,7 @@ from vaultforge.application.retention.schemas import (
     ScheduleResourceRequest,
 )
 from vaultforge.core.exceptions import ConflictError, NotFoundError
-from vaultforge.domain.common import utc_now
 from vaultforge.domain.retention.entities import LegalHold, RetentionPolicy, RetentionSchedule
-from vaultforge.domain.retention.enums import RetentionScope
 from vaultforge.domain.retention.repositories import RetentionScheduleQuery
 
 

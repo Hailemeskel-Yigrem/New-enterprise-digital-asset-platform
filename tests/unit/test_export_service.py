@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Sequence
+from collections.abc import Sequence
 
 import pytest
 
@@ -31,12 +31,16 @@ class MemoryExportJobs:
     async def get_by_id(self, organization_id: uuid.UUID, job_id: uuid.UUID) -> ExportJob | None:
         return next((j for j in self.items if j.id == job_id), None)
 
-    async def list_for_organization(self, organization_id: uuid.UUID, *, limit: int = 50) -> Sequence[ExportJob]:
+    async def list_for_organization(
+        self, organization_id: uuid.UUID, *, limit: int = 50
+    ) -> Sequence[ExportJob]:
         return self.items
 
 
 class StubDocs:
-    async def fetch_documents(self, organization_id, resource_ids, *, include_metadata, include_versions):
+    async def fetch_documents(
+        self, organization_id, resource_ids, *, include_metadata, include_versions
+    ):
         return [
             {"filename": f"{rid}.txt", "content": b"data", "metadata": {"id": str(rid)}}
             for rid in resource_ids

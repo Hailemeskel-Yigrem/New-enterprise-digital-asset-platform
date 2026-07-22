@@ -84,7 +84,9 @@ def test_field_filter_between() -> None:
     query = SearchQuery(
         organization_id=org_id,
         filters=[
-            FieldFilter(field="size_bytes", operator=FilterOperator.BETWEEN, values=[100, 5000])
+            FieldFilter(
+                field_name="size_bytes", operator=FilterOperator.BETWEEN, values=[100, 5000]
+            )
         ],
     )
     built = builder.build(query)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import Sequence
+from collections.abc import Sequence
 
 import pytest
 
@@ -31,12 +31,16 @@ class MemoryImportJobs:
     async def get_by_id(self, organization_id: uuid.UUID, job_id: uuid.UUID) -> ImportJob | None:
         return next((j for j in self.items if j.id == job_id), None)
 
-    async def list_for_organization(self, organization_id: uuid.UUID, *, limit: int = 50) -> Sequence[ImportJob]:
+    async def list_for_organization(
+        self, organization_id: uuid.UUID, *, limit: int = 50
+    ) -> Sequence[ImportJob]:
         return self.items
 
 
 class StubSink:
-    async def import_document(self, organization_id, *, filename, content, metadata, target_folder_id, overwrite):
+    async def import_document(
+        self, organization_id, *, filename, content, metadata, target_folder_id, overwrite
+    ):
         return uuid.uuid4()
 
 

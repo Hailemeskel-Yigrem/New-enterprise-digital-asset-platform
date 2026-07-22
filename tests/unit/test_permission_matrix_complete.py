@@ -7,7 +7,7 @@ import uuid
 import pytest
 
 from vaultforge.domain.identity.entities import Membership
-from vaultforge.domain.identity.enums import MembershipStatus, OrgRole, Permission, ROLE_PERMISSIONS
+from vaultforge.domain.identity.enums import ROLE_PERMISSIONS, MembershipStatus, OrgRole, Permission
 
 
 @pytest.mark.parametrize("permission", list(Permission))
