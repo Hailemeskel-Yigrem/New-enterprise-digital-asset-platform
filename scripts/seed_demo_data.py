@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import os
 import uuid
 
 from sqlalchemy import select
@@ -23,11 +24,24 @@ from vaultforge.infrastructure.persistence.models.user import UserModel
 from vaultforge.infrastructure.security import hash_password
 
 DEMO_ORG_SLUG = "acme-demo"
-DEMO_PASSWORD = "DemoPass123!"
+
+
+def resolve_demo_password(*, dry_run: bool) -> str:
+    """Load DEMO_PASSWORD from the environment; required unless dry-run."""
+    password = os.environ.get("DEMO_PASSWORD")
+    if password:
+        return password
+    if dry_run:
+        return ""
+    raise RuntimeError(
+        "DEMO_PASSWORD environment variable is required to seed demo users. "
+        "Set it explicitly; do not hardcode credentials in source."
+    )
 
 
 async def seed(*, dry_run: bool) -> None:
     settings = get_settings()
+    demo_password = resolve_demo_password(dry_run=dry_run)
     engine = create_async_engine(settings.database_url)
     session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -38,6 +52,9 @@ async def seed(*, dry_run: bool) -> None:
     contracts_folder_id = uuid.uuid5(uuid.NAMESPACE_DNS, "vaultforge.demo.contracts")
     doc_id = uuid.uuid5(uuid.NAMESPACE_DNS, "vaultforge.demo.doc")
     version_id = uuid.uuid5(uuid.NAMESPACE_DNS, "vaultforge.demo.version")
+
+    # Password hashing is skipped in dry-run when DEMO_PASSWORD is unset.
+    password_hash = hash_password(demo_password) if demo_password else ""
 
     plan = {
         "organization": OrganizationModel(
@@ -52,7 +69,7 @@ async def seed(*, dry_run: bool) -> None:
                 id=owner_id,
                 email="owner@acme-demo.test",
                 full_name="Demo Owner",
-                password_hash=hash_password(DEMO_PASSWORD),
+                password_hash=password_hash,
                 is_active=True,
                 is_email_verified=True,
             ),
@@ -60,7 +77,7 @@ async def seed(*, dry_run: bool) -> None:
                 id=admin_id,
                 email="admin@acme-demo.test",
                 full_name="Demo Admin",
-                password_hash=hash_password(DEMO_PASSWORD),
+                password_hash=password_hash,
                 is_active=True,
                 is_email_verified=True,
             ),

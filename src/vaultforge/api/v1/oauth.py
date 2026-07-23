@@ -58,7 +58,7 @@ async def oauth_token(
 ) -> OAuthTokenResponse:
     users = SqlAlchemyUserRepository(db)
     try:
-        if grant_type == OAuthGrantType.PASSWORD:
+        if grant_type == OAuthGrantType.RESOURCE_OWNER_PASSWORD:
             if not username or not password:
                 raise HTTPException(
                     status.HTTP_400_BAD_REQUEST, detail="username/password required"
