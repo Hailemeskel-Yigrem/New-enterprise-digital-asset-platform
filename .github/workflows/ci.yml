@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [main, master, develop]
 
 jobs:
   quality:
@@ -20,17 +20,53 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: poetry-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
+          key: poetry-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
         run: poetry install --no-interaction
+      - name: Dependency audit
+        run: poetry run pip-audit
+        continue-on-error: true
       - name: Ruff
-        run: poetry run ruff check src tests
+        run: poetry run ruff check src tests scripts
       - name: Black
-        run: poetry run black --check src tests
+        run: poetry run black --check src tests scripts
       - name: MyPy
         run: poetry run mypy src
       - name: Pytest
-        run: poetry run pytest -q --cov=vaultforge --cov-report=xml
+        run: poetry run pytest -q --cov=vaultforge --cov-report=xml --cov-fail-under=75
         env:
           APP_SECRET_KEY: test-secret-key-32chars-minimum!!
           JWT_SECRET_KEY: test-jwt-secret-key-32chars-min!!
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Poetry
+        run: pip install poetry==1.8.5
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: Start Postgres and Redis
+        run: docker compose -f docker-compose.yml up -d postgres redis
+      - name: Wait for dependencies
+        run: |
+          for i in $(seq 1 30); do
+            docker compose exec -T postgres pg_isready -U vaultforge && \
+              docker compose exec -T redis redis-cli ping | grep -q PONG && break
+            sleep 2
+          done
+      - name: Integration tests
+        run: poetry run pytest -q tests/integration
+        env:
+          APP_SECRET_KEY: test-secret-key-32chars-minimum!!
+          JWT_SECRET_KEY: test-jwt-secret-key-32chars-min!!
+          APP_ENV: test
+          DATABASE_URL: postgresql+asyncpg://vaultforge:vaultforge@localhost:5432/vaultforge
+          REDIS_URL: redis://localhost:6379/0
+          RUN_LIVE_INTEGRATION: "1"
+      - name: Tear down containers
+        if: always()
+        run: docker compose -f docker-compose.yml down -v
