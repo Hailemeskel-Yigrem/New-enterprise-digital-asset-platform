@@ -236,3 +236,142 @@ async def test_upload_normalizes_tags_and_stores_version() -> None:
     assert response.tags == ["legal", "q1"]
     storage.put.assert_awaited_once()
     versions.add.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_create_version_supersedes_current() -> None:
+    document = _document()
+    user_id = uuid.uuid4()
+    current = DocumentVersion(
+        id=uuid.uuid4(),
+        document_id=document.id,
+        version_number=1,
+        status=VersionStatus.CURRENT,
+        storage_key="old",
+        created_at=_now(),
+        updated_at=_now(),
+    )
+    documents = AsyncMock()
+    documents.get_by_id = AsyncMock(return_value=document)
+    documents.update = AsyncMock(side_effect=lambda doc: doc)
+    versions = AsyncMock()
+    versions.get_latest = AsyncMock(return_value=current)
+    versions.update = AsyncMock(side_effect=lambda ver: ver)
+    versions.add = AsyncMock(side_effect=lambda ver: ver)
+    locks = AsyncMock()
+    locks.get_active_for_document = AsyncMock(return_value=None)
+    storage = AsyncMock()
+    service = _service(documents=documents, versions=versions, locks=locks, storage=storage)
+
+    response = await service.create_version(
+        document.organization_id,
+        document.id,
+        user_id,
+        DocumentVersionCreateRequest(comment="v2"),
+        content=b"v2-body",
+        content_type="application/pdf",
+    )
+    assert response.current_version is not None
+    assert response.current_version.version_number == 2
+    assert current.status == VersionStatus.SUPERSEDED
+    storage.put.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_checkout_and_checkin_flow() -> None:
+    document = _document()
+    user_id = uuid.uuid4()
+    documents = AsyncMock()
+    documents.get_by_id = AsyncMock(return_value=document)
+    documents.update = AsyncMock(side_effect=lambda doc: doc)
+    locks = AsyncMock()
+    locks.get_active_for_document = AsyncMock(return_value=None)
+    locks.add = AsyncMock(side_effect=lambda lock: lock)
+    locks.delete = AsyncMock()
+    versions = AsyncMock()
+    versions.get_by_id = AsyncMock(return_value=None)
+    service = _service(documents=documents, locks=locks, versions=versions)
+
+    checkout = await service.checkout(document.organization_id, document.id, user_id)
+    assert checkout.locked_by == user_id
+
+    active = DocumentLock(document_id=document.id, locked_by=user_id)
+    locks.get_active_for_document = AsyncMock(return_value=active)
+    response = await service.checkin(document.organization_id, document.id, user_id)
+    assert response.id == document.id
+    locks.delete.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_archive_and_soft_delete() -> None:
+    document = _document()
+    documents = AsyncMock()
+    documents.get_by_id = AsyncMock(return_value=document)
+    documents.update = AsyncMock(side_effect=lambda doc: doc)
+    locks = AsyncMock()
+    locks.get_active_for_document = AsyncMock(return_value=None)
+    versions = AsyncMock()
+    versions.get_by_id = AsyncMock(return_value=None)
+    service = _service(documents=documents, locks=locks, versions=versions)
+
+    archived = await service.archive_document(document.organization_id, document.id)
+    assert archived.status == DocumentStatus.ARCHIVED
+
+    document.status = DocumentStatus.ACTIVE
+    deleted = await service.soft_delete(document.organization_id, document.id)
+    assert deleted.status == DocumentStatus.DELETED
+
+
+@pytest.mark.asyncio
+async def test_update_document_applies_fields() -> None:
+    document = _document()
+    documents = AsyncMock()
+    documents.get_by_id = AsyncMock(return_value=document)
+    documents.update = AsyncMock(side_effect=lambda doc: doc)
+    locks = AsyncMock()
+    locks.get_active_for_document = AsyncMock(return_value=None)
+    versions = AsyncMock()
+    versions.get_by_id = AsyncMock(return_value=None)
+    service = _service(documents=documents, locks=locks, versions=versions)
+
+    response = await service.update_document(
+        document.organization_id,
+        document.id,
+        DocumentUpdateRequest(
+            name="Renamed.pdf",
+            sensitivity=SensitivityLabel.RESTRICTED,
+            tags=["a", "B"],
+        ),
+    )
+    assert response.name == "Renamed.pdf"
+    assert response.sensitivity == SensitivityLabel.RESTRICTED
+    assert response.tags == ["a", "b"]
+
+
+@pytest.mark.asyncio
+async def test_download_content_success() -> None:
+    version_id = uuid.uuid4()
+    document = _document(current_version_id=version_id, name="file.pdf")
+    version = DocumentVersion(
+        id=version_id,
+        document_id=document.id,
+        version_number=1,
+        storage_key="org/doc/v1/file.pdf",
+        content_type="application/pdf",
+        size_bytes=4,
+        checksum_sha256="abcd",
+        created_at=_now(),
+        updated_at=_now(),
+    )
+    documents = AsyncMock()
+    documents.get_by_id = AsyncMock(return_value=document)
+    versions = AsyncMock()
+    versions.get_by_id = AsyncMock(return_value=version)
+    storage = AsyncMock()
+    storage.get = AsyncMock(return_value=b"data")
+    service = _service(documents=documents, versions=versions, storage=storage)
+
+    result = await service.download_content(document.organization_id, document.id)
+    assert result.data == b"data"
+    assert result.filename == "file.pdf"
+    assert result.version_id == version_id
