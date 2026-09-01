@@ -66,6 +66,8 @@ jobs:
         run: pip install poetry==1.8.5
       - name: Install dependencies
         run: poetry install --no-interaction
+      - name: Prepare Compose environment
+        run: cp .env.example .env
       - name: Start Postgres and Redis
         run: docker compose -f docker-compose.yml up -d postgres redis
       - name: Wait for dependencies
