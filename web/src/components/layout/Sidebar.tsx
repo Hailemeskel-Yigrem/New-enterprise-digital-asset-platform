@@ -41,7 +41,7 @@ export function Sidebar() {
   const { isAuthenticated } = useAuth();
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["notifications-unread-count"],
-    queryFn: getUnreadCount,
+    queryFn: () => getUnreadCount(),
     enabled: isAuthenticated,
     refetchInterval: 60_000,
   });
@@ -86,7 +86,7 @@ export function Sidebar() {
         })}
       </nav>
       <div className="border-t border-vault-800 p-4">
-        <p className="text-xs text-slate-500">Enterprise document vault · v0.9.0</p>
+        <p className="text-xs text-slate-500">Enterprise document vault · v1.0.0-rc1</p>
       </div>
     </aside>
   );

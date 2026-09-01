@@ -87,17 +87,17 @@ export default function NotificationsPage() {
   });
 
   const readMutation = useMutation({
-    mutationFn: markNotificationRead,
+    mutationFn: (notificationId: string) => markNotificationRead(notificationId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   });
 
   const readAllMutation = useMutation({
-    mutationFn: markAllNotificationsRead,
+    mutationFn: () => markAllNotificationsRead(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteNotification,
+    mutationFn: (notificationId: string) => deleteNotification(notificationId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   });
 

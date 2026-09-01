@@ -14,9 +14,18 @@ import { useQuery } from "@tanstack/react-query";
 import { Building2, HardDrive, Shield, Users } from "lucide-react";
 
 export default function AdminPage() {
-  const { data: overview } = useQuery({ queryKey: ["admin-overview"], queryFn: getAdminOverview });
-  const { data: members = [] } = useQuery({ queryKey: ["admin-members"], queryFn: listAdminMembers });
-  const { data: storage } = useQuery({ queryKey: ["admin-storage"], queryFn: getStorageBreakdown });
+  const { data: overview } = useQuery({
+    queryKey: ["admin-overview"],
+    queryFn: () => getAdminOverview(),
+  });
+  const { data: members = [] } = useQuery({
+    queryKey: ["admin-members"],
+    queryFn: () => listAdminMembers(),
+  });
+  const { data: storage } = useQuery({
+    queryKey: ["admin-storage"],
+    queryFn: () => getStorageBreakdown(),
+  });
 
   return (
     <>

@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { Folder } from "@/lib/types";
-import { Archive, ChevronRight, Folder, FolderOpen, Share2 } from "lucide-react";
+import { Archive, ChevronRight, Folder as FolderIcon, FolderOpen, Share2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 function kindIcon(kind: Folder["kind"]) {
@@ -12,7 +12,7 @@ function kindIcon(kind: Folder["kind"]) {
     case "shared":
       return Share2;
     default:
-      return Folder;
+      return FolderIcon;
   }
 }
 
