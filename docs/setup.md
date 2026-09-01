@@ -11,6 +11,19 @@ This guide covers local development setup and Docker-based infrastructure for Va
 
 Optional: Node.js 20+ if working on the `web/` frontend.
 
+## Dev Container (VS Code/Codespaces)
+
+Open the repository in a devcontainer-capable editor and choose **Reopen in Container**.
+The configuration creates `.env` from `.env.example` when needed, starts PostgreSQL,
+Redis, RabbitMQ, and the API container, installs Poetry dependencies, applies migrations,
+and forwards port 8000.
+
+After the container finishes provisioning, verify the environment with:
+
+```bash
+poetry run pytest -q
+```
+
 ## Local setup (recommended)
 
 ### 1. Environment
