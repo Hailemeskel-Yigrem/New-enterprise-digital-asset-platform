@@ -27,7 +27,8 @@ from vaultforge.infrastructure.security.jwt import TOKEN_TYPE_REFRESH
 class OAuthGrantType(StrEnum):
     """OAuth 2.0 grant_type identifiers (RFC 6749) — protocol names, not credentials."""
 
-    RESOURCE_OWNER_PASSWORD = "password"
+    # RFC 6749 grant_type protocol literal; this value is not a credential or secret.
+    RESOURCE_OWNER_PASSWORD = "password"  # nosec B105  # pragma: allowlist secret
     REFRESH_TOKEN = "refresh_token"
     AUTHORIZATION_CODE = "authorization_code"
     CLIENT_CREDENTIALS = "client_credentials"
