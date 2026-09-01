@@ -42,7 +42,7 @@ def test_client_secret_validation() -> None:
         client_id="app",
         client_secret="secret",
         client_type=OAuthClientType.CONFIDENTIAL,
-        allowed_grant_types=frozenset({OAuthGrantType.PASSWORD}),
+        allowed_grant_types=frozenset({OAuthGrantType.RESOURCE_OWNER_PASSWORD}),
         redirect_uris=frozenset(),
         scopes=frozenset({"vaultforge.api"}),
     )
@@ -54,7 +54,7 @@ def test_client_secret_validation() -> None:
 def test_build_default_client_registry() -> None:
     registry = build_default_client_registry()
     client = registry.get("vaultforge-web")
-    assert OAuthGrantType.PASSWORD in client.allowed_grant_types
+    assert OAuthGrantType.RESOURCE_OWNER_PASSWORD in client.allowed_grant_types
 
 
 def test_oauth_facade_authorization_code() -> None:

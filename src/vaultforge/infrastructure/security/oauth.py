@@ -25,7 +25,9 @@ from vaultforge.infrastructure.security.jwt import TOKEN_TYPE_REFRESH
 
 
 class OAuthGrantType(StrEnum):
-    PASSWORD = "password"
+    """OAuth 2.0 grant_type identifiers (RFC 6749) — protocol names, not credentials."""
+
+    RESOURCE_OWNER_PASSWORD = "password"
     REFRESH_TOKEN = "refresh_token"
     AUTHORIZATION_CODE = "authorization_code"
     CLIENT_CREDENTIALS = "client_credentials"
@@ -153,7 +155,7 @@ def build_default_client_registry(settings: Settings | None = None) -> OAuthClie
             client_type=OAuthClientType.CONFIDENTIAL,
             allowed_grant_types=frozenset(
                 {
-                    OAuthGrantType.PASSWORD,
+                    OAuthGrantType.RESOURCE_OWNER_PASSWORD,
                     OAuthGrantType.REFRESH_TOKEN,
                     OAuthGrantType.AUTHORIZATION_CODE,
                 }
@@ -258,7 +260,7 @@ class OAuth2PasswordGrantHandler:
     ) -> OAuthTokenResponse:
         client = self.client_registry.get(client_id)
         client.validate_secret(client_secret)
-        if OAuthGrantType.PASSWORD not in client.allowed_grant_types:
+        if OAuthGrantType.RESOURCE_OWNER_PASSWORD not in client.allowed_grant_types:
             raise AuthenticationError("Password grant not allowed for this client")
         scopes = _parse_scopes(scope, client.scopes)
         user_id = await self.password_authenticator.authenticate(
