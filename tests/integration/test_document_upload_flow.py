@@ -13,6 +13,7 @@ from pathlib import Path
 
 import pytest
 import pytest_asyncio
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from vaultforge.application.assets.document_service import DocumentService
@@ -23,8 +24,7 @@ from vaultforge.application.assets.schemas import (
 from vaultforge.domain.assets.entities import Folder
 from vaultforge.domain.assets.enums import FolderKind, SensitivityLabel, VersionStatus
 from vaultforge.infrastructure.persistence.base import Base
-from vaultforge.infrastructure.persistence.models.document import (  # noqa: F401
-    DocumentLockModel,
+from vaultforge.infrastructure.persistence.models.document import (
     DocumentModel,
     DocumentVersionModel,
 )
@@ -133,6 +133,18 @@ async def test_document_upload_and_version_persists(
     assert reloaded.current_version is not None
     assert reloaded.current_version.version_number == 2
     assert reloaded.current_version_id == versioned.current_version.id
+
+    persisted_document = await db_session.scalar(
+        select(DocumentModel).where(DocumentModel.id == uploaded.id)
+    )
+    persisted_version_count = await db_session.scalar(
+        select(func.count())
+        .select_from(DocumentVersionModel)
+        .where(DocumentVersionModel.document_id == uploaded.id)
+    )
+    assert persisted_document is not None
+    assert persisted_document.current_version_id == versioned.current_version.id
+    assert persisted_version_count == 2
 
     stored_files = [path for path in (tmp_path / "storage").rglob("*") if path.is_file()]
     assert len(stored_files) >= 2
