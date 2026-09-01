@@ -2,7 +2,11 @@
 name = "vaultforge"
 version = "1.0.0rc1"
 description = "Enterprise Digital Asset & Document Management Platform"
-authors = ["Hailemeskel Yigrem <hailemeskelyigrem5@gmail.com>"]
+authors = [
+    "Hailemeskel Yigrem <hailemeskelyigrem5@gmail.com>",
+    "Biniam Endeg <biniamshambel12@gmail.com>",
+    "Ermiyas Wubet <ermiyaswubet23@gmail.com>",
+]
 readme = "README.md"
 packages = [{ include = "vaultforge", from = "src" }]
 

@@ -104,6 +104,12 @@ docs/             Setup, development, deployment, API reference
 - [Troubleshooting](docs/troubleshooting.md)
 - [Changelog](CHANGELOG.md)
 
+## Contributors
+
+- Hailemeskel Yigrem — <hailemeskelyigrem5@gmail.com>
+- Biniam Endeg — <biniamshambel12@gmail.com>
+- Ermiyas Wubet — <ermiyaswubet23@gmail.com>
+
 ## License
 
 Proprietary - internal enterprise use.
