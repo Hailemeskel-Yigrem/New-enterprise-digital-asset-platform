@@ -5,7 +5,7 @@ This guide covers local development setup and Docker-based infrastructure for Va
 ## Prerequisites
 
 - Python 3.12+
-- Poetry 1.8+
+- Poetry 2.3+
 - Docker Desktop or Docker Engine + Compose v2
 - Git
 

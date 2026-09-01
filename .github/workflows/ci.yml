@@ -32,7 +32,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install Poetry
-        run: pip install poetry==1.8.5
+        run: pip install poetry==2.3.4 poetry-plugin-export==1.10.0
       - name: Cache Poetry venv
         uses: actions/cache@v4
         with:
@@ -41,8 +41,12 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
       - name: Dependency audit
-        run: poetry run pip-audit
-        continue-on-error: true
+        run: |
+          poetry export --with dev --without-hashes --format requirements.txt \
+            --output /tmp/vaultforge-audit-requirements.txt
+          # python-jose depends on ecdsa, which has no fixed release for this advisory.
+          poetry run pip-audit --requirement /tmp/vaultforge-audit-requirements.txt \
+            --ignore-vuln PYSEC-2026-1325
       - name: Ruff
         run: poetry run ruff check src tests scripts
       - name: Black
@@ -63,7 +67,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install Poetry
-        run: pip install poetry==1.8.5
+        run: pip install poetry==2.3.4 poetry-plugin-export==1.10.0
       - name: Install dependencies
         run: poetry install --no-interaction
       - name: Prepare Compose environment
