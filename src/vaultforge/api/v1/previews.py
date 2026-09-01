@@ -44,7 +44,7 @@ def _http_error(exc: VaultForgeError) -> Exception:
 
     status_code = {
         "not_found": status.HTTP_404_NOT_FOUND,
-        "validation_error": status.HTTP_422_UNPROCESSABLE_ENTITY,
+        "validation_error": status.HTTP_422_UNPROCESSABLE_CONTENT,
     }.get(exc.code, status.HTTP_400_BAD_REQUEST)
     return HTTPException(status_code=status_code, detail={"code": exc.code, "message": exc.message})
 

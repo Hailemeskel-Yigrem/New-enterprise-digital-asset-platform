@@ -35,7 +35,7 @@ def _http_error(exc: VaultForgeError) -> Exception:
     status_code = {
         "not_found": status.HTTP_404_NOT_FOUND,
         "conflict": status.HTTP_409_CONFLICT,
-        "validation_error": status.HTTP_422_UNPROCESSABLE_ENTITY,
+        "validation_error": status.HTTP_422_UNPROCESSABLE_CONTENT,
         "forbidden": status.HTTP_403_FORBIDDEN,
         "unauthorized": status.HTTP_401_UNAUTHORIZED,
     }.get(exc.code, status.HTTP_400_BAD_REQUEST)

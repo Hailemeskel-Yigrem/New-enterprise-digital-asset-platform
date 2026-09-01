@@ -18,7 +18,7 @@ def _status_for_code(code: str) -> int:
         "conflict": status.HTTP_409_CONFLICT,
         "forbidden": status.HTTP_403_FORBIDDEN,
         "unauthorized": status.HTTP_401_UNAUTHORIZED,
-        "validation_error": status.HTTP_422_UNPROCESSABLE_ENTITY,
+        "validation_error": status.HTTP_422_UNPROCESSABLE_CONTENT,
     }.get(code, status.HTTP_400_BAD_REQUEST)
 
 

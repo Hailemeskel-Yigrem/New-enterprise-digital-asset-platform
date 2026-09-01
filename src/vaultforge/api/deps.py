@@ -43,7 +43,7 @@ def _raise_http(exc: VaultForgeError) -> None:
         "conflict": status.HTTP_409_CONFLICT,
         "forbidden": status.HTTP_403_FORBIDDEN,
         "unauthorized": status.HTTP_401_UNAUTHORIZED,
-        "validation_error": status.HTTP_422_UNPROCESSABLE_ENTITY,
+        "validation_error": status.HTTP_422_UNPROCESSABLE_CONTENT,
     }.get(exc.code, status.HTTP_400_BAD_REQUEST)
     raise HTTPException(status_code=status_code, detail={"code": exc.code, "message": exc.message})
 

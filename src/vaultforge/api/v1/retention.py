@@ -44,7 +44,7 @@ def _http_error(exc: VaultForgeError) -> Exception:
     code_map = {
         "not_found": status.HTTP_404_NOT_FOUND,
         "conflict": status.HTTP_409_CONFLICT,
-        "validation_error": status.HTTP_422_UNPROCESSABLE_ENTITY,
+        "validation_error": status.HTTP_422_UNPROCESSABLE_CONTENT,
         "forbidden": status.HTTP_403_FORBIDDEN,
     }
     return HTTPException(
