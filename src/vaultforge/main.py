@@ -15,12 +15,18 @@ from vaultforge.api.monitoring import router as monitoring_router
 from vaultforge.api.v1.router import api_v1_router
 from vaultforge.api.ws.notifications import router as ws_router
 from vaultforge.core.config import get_settings
+from vaultforge.core.error_tracking import init_error_tracking
 from vaultforge.core.logging import configure_logging, get_logger
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
     configure_logging(debug=settings.app_debug)
+    init_error_tracking(
+        dsn=settings.sentry_dsn,
+        environment=settings.app_env,
+        release=__version__,
+    )
     log = get_logger("vaultforge.startup")
 
     app = FastAPI(

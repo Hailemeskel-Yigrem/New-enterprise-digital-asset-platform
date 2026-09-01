@@ -68,6 +68,9 @@ class Settings(BaseSettings):
     rate_limit_export_requests: int = 5
     rate_limit_export_window: int = 300
 
+    sentry_dsn: str | None = None
+    vaultforge_base_url: str = "http://localhost:8000"
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def split_cors_origins(cls, value: object) -> object:

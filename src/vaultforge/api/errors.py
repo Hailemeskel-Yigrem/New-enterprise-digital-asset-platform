@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
+from vaultforge.core.error_tracking import capture_exception
 from vaultforge.core.exceptions import VaultForgeError
 from vaultforge.core.logging import get_logger
 
@@ -36,6 +37,7 @@ async def unhandled_error_handler(request: Request, exc: Exception) -> JSONRespo
         error=str(exc),
         error_type=type(exc).__name__,
     )
+    capture_exception(exc, path=request.url.path, method=request.method)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
