@@ -18,7 +18,7 @@ pydantic-settings = "^2.6.0"
 python-jose = { extras = ["cryptography"], version = "^3.3.0" }
 passlib = { extras = ["bcrypt"], version = "^1.7.4" }
 python-multipart = "^0.0.17"
-redis = "^5.2.0"
+redis = ">=5.2,<7.0"
 celery = { extras = ["redis"], version = "^5.4.0" }
 httpx = "^0.28.0"
 orjson = "^3.10.0"
